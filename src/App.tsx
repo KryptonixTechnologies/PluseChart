@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation, useParams } from "react-router-dom";
 import "./App.css";
 import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
@@ -8,54 +7,56 @@ import Contacts from "./pages/Contacts";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import Accounts from "./pages/Accounts";
-import { SignInPage } from "./pages/Auth";
-import Onboarding from "./pages/Onboarding";
+import { CompanySignupPage, LoginPage, SignupPage } from "./pages/Auth";
 import { AppDataProvider } from "./hooks/AppDataProvider";
-import { useAppData } from "./hooks/useAppData";
+import { AuthProvider } from "./hooks/AuthProvider";
+import { useAuth } from "./hooks/useAuth";
 
 function RequireAuth() {
-  const { currentAccount } = useAppData();
-  return currentAccount ? <Outlet /> : <Navigate to="/sign-in" replace />;
+  const { session } = useAuth();
+  const location = useLocation();
+  return session?.accessToken && session.tenantId
+    ? <Outlet />
+    : <Navigate to="/login" state={{ from: `${location.pathname}${location.search}` }} replace />;
 }
 
 function App() {
   return (
-    <AppDataProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/onboarding" element={<SetupRoute />} />
-          <Route path="/sign-in" element={<SignInPage />} />
+    <AuthProvider>
+      <AppDataProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/signup/invite/:code" element={<SignupPage />} />
+            <Route path="/company-signup" element={<CompanySignupPage />} />
+            <Route path="/register" element={<LegacySignupRoute />} />
+            <Route path="/setup" element={<Navigate to="/signup" replace />} />
+            <Route path="/onboarding" element={<Navigate to="/signup" replace />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/sign-in" element={<Navigate to="/login" replace />} />
 
-          <Route path="/setup" element={<SetupRoute />} />
-          <Route path="/register" element={<Navigate to="/setup" replace />} />
-
-          <Route element={<RequireAuth />}>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<Navigate to="/dashboard" replace />} />
-
-              <Route path="dashboard" element={<Dashboard />} />
-
-              <Route path="messages" element={<Messages />} />
-
-              <Route path="contacts" element={<Contacts />} />
-
-              <Route path="reports" element={<Reports />} />
-
-              <Route path="settings" element={<Settings />} />
-
-              <Route path="accounts" element={<Accounts />} />
+            <Route element={<RequireAuth />}>
+              <Route path="/" element={<Layout />}>
+                <Route index element={<Navigate to="/dashboard" replace />} />
+                <Route path="dashboard" element={<Dashboard />} />
+                <Route path="messages" element={<Messages />} />
+                <Route path="contacts" element={<Contacts />} />
+                <Route path="reports" element={<Reports />} />
+                <Route path="settings" element={<Settings />} />
+                <Route path="accounts" element={<Accounts />} />
+              </Route>
             </Route>
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </AppDataProvider>
+          </Routes>
+        </BrowserRouter>
+      </AppDataProvider>
+    </AuthProvider>
   );
 }
 
-function SetupRoute() {
-  const { accounts } = useAppData();
-  const [setupAvailable] = useState(() => accounts.length === 0);
-  return setupAvailable ? <Onboarding /> : <Navigate to="/sign-in" replace />;
+function LegacySignupRoute() {
+  const { search } = useLocation();
+  const { code } = useParams();
+  return <Navigate to={`/signup${code ? `/invite/${encodeURIComponent(code)}` : ""}${search}`} replace />;
 }
 
 export default App;

@@ -1,12 +1,14 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { ContactRound, UserPlus } from "lucide-react";
 import { useAppData } from "../hooks/useAppData";
+import { useAuth } from "../hooks/useAuth";
 
 function Layout() {
   const navigate = useNavigate();
-  const { currentAccount, settings, messages, signOut } = useAppData();
-  const displayName = currentAccount?.fullName ?? settings.profile.fullName;
-  const displayRole = currentAccount?.role ?? settings.profile.role;
+  const { currentAccount, settings, messages, signOut: clearLocalSession } = useAppData();
+  const { session, logout } = useAuth();
+  const displayName = session?.user.name ?? currentAccount?.fullName ?? settings.profile.fullName;
+  const displayRole = session?.user.role ?? currentAccount?.role ?? settings.profile.role;
   const initials = displayName.split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase();
   const unreadCount = messages.filter((message) => !message.read && message.folder !== "archived").length;
 
@@ -118,7 +120,7 @@ function Layout() {
                 <span>{displayRole}</span>
               </div>
             </div>
-            <button className="signout-button" type="button" onClick={() => { signOut(); navigate("/sign-in", { replace: true }); }}>Sign out</button>
+            <button className="signout-button" type="button" onClick={() => { logout(); clearLocalSession(); navigate("/login", { replace: true }); }}>Sign out</button>
           </div>
         </header>
 

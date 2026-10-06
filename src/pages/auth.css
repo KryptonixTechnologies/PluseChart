@@ -1,0 +1,201 @@
+.tenant-auth-page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 28px 18px;
+  background:
+    radial-gradient(ellipse at 10% 10%, rgba(20, 73, 126, .2), transparent 32rem),
+    radial-gradient(ellipse at 90% 85%, rgba(15, 92, 71, .14), transparent 28rem),
+    #071521;
+  color: #eaf2f4;
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+}
+
+.tenant-auth-card {
+  width: min(440px, 100%);
+  border: 1px solid #1d3949;
+  border-radius: 14px;
+  padding: 34px;
+  background: linear-gradient(145deg, #102330, #0a1a26);
+  box-shadow: 0 22px 75px rgba(0, 0, 0, .25);
+}
+
+.tenant-auth-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 32px;
+  color: #eef6f7;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.tenant-auth-mark {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #1c659d, #0f5c47);
+  color: #fff;
+  font-size: 19px;
+}
+
+.tenant-auth-brand small {
+  display: block;
+  margin-top: 3px;
+  color: #8fa4b1;
+  font-family: "DM Sans", sans-serif;
+  font-size: 8px;
+  letter-spacing: .14em;
+}
+
+.tenant-auth-eyebrow {
+  color: #67cba6;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .14em;
+}
+
+.tenant-auth-card h1 {
+  margin: 9px 0 6px;
+  color: #f1f6f8;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 27px;
+}
+
+.tenant-auth-description {
+  margin: 0 0 23px;
+  color: #91a6b1;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.tenant-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.tenant-auth-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #c9d8dd;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.tenant-auth-form input {
+  min-height: 43px;
+  border: 1px solid #2a4655;
+  border-radius: 7px;
+  padding: 0 12px;
+  background: #091a26;
+  color: #edf4f6;
+  font: inherit;
+  font-size: 12px;
+}
+
+.tenant-auth-form select {
+  min-height: 43px;
+  border: 1px solid #2a4655;
+  border-radius: 7px;
+  padding: 0 12px;
+  background: #091a26;
+  color: #edf4f6;
+  font: inherit;
+  font-size: 12px;
+}
+
+.tenant-auth-form input::placeholder {
+  color: #6f8793;
+}
+
+.tenant-auth-form input:focus-visible,
+.tenant-auth-form select:focus-visible {
+  border-color: #398aa3;
+  outline: 2px solid rgba(57, 138, 163, .32);
+  outline-offset: 1px;
+}
+
+.tenant-auth-section-label {
+  margin-top: 3px;
+  border-top: 1px solid #233c4a;
+  padding-top: 15px;
+  color: #68cba5;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+.company-auth-card {
+  margin: 24px 0;
+}
+
+.tenant-auth-submit {
+  min-height: 44px;
+  margin-top: 5px;
+  border: 0;
+  border-radius: 7px;
+  background: linear-gradient(110deg, #165a8d, #0d7058);
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tenant-auth-submit:hover:not(:disabled) {
+  background: linear-gradient(110deg, #1a6ba6, #108064);
+}
+
+.tenant-auth-submit:disabled {
+  cursor: wait;
+  opacity: .7;
+}
+
+.tenant-auth-switch {
+  margin: 20px 0 0;
+  color: #92a7b1;
+  font-size: 11px;
+  text-align: center;
+}
+
+.tenant-auth-switch a {
+  color: #70d5af;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.tenant-auth-switch a:hover {
+  text-decoration: underline;
+}
+
+.tenant-auth-error {
+  margin: 0 0 16px;
+  border: 1px solid #874550;
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: rgba(135, 69, 80, .16);
+  color: #ffb2b7;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.tenant-auth-company-ref {
+  display: block;
+  margin-top: 16px;
+  color: #6fb99e;
+  font-size: 10px;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .tenant-auth-card {
+    padding: 27px 22px;
+  }
+}
