@@ -20,3 +20,11 @@ export function writeStored<T>(key: string, value: T) {
     // Storage can be unavailable in private browsing or restricted environments.
   }
 }
+
+export function removeStored(key: string) {
+  try {
+    window.localStorage.removeItem(storageKey(key));
+  } catch {
+    // Storage can be unavailable in private browsing or restricted environments.
+  }
+}

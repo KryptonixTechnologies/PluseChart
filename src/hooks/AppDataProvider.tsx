@@ -4,11 +4,45 @@ import { createPasswordCredential, verifyPassword } from "../services/localAuth"
 import { readStored, writeStored } from "../services/storage";
 import { AppDataContext } from "./appDataContext";
 import type { AppDataContextValue } from "./appDataContext";
-import type { Account, AppSettings } from "../types/models";
+import type { Account, AppSettings, LocalWorkspace, SubscriptionPlan, WorkspaceSubscription } from "../types/models";
+import { defaultWorkspaceSubscription } from "../types/models";
 import type { PasswordCredential } from "../services/localAuth";
 
 function createId(prefix: string) {
   return `${prefix}-${crypto.randomUUID()}`;
+}
+
+function createInviteCode() {
+  return crypto.randomUUID().replaceAll("-", "").slice(0, 8).toUpperCase();
+}
+
+function readWorkspace(): LocalWorkspace | null {
+  const stored = readStored<Partial<LocalWorkspace> | null>("workspace", null);
+  if (!stored) return null;
+
+  const plan = stored.subscription?.plan ?? defaultWorkspaceSubscription.plan;
+  const billingCycle = stored.subscription?.billingCycle ?? defaultWorkspaceSubscription.billingCycle;
+  const previousPrices: Record<SubscriptionPlan, number> = { Starter: 29, Growth: 79, Enterprise: 149 };
+  const currentPrices: Record<SubscriptionPlan, number> = { Starter: 1500, Growth: 4900, Enterprise: 12000 };
+  const previousPrice = previousPrices[plan] * (billingCycle === "yearly" ? 10 : 1);
+  const currentPrice = currentPrices[plan] * (billingCycle === "yearly" ? 10 : 1);
+  const savedPrice = stored.subscription?.price;
+  const subscription: WorkspaceSubscription = {
+    ...defaultWorkspaceSubscription,
+    ...(stored.subscription ?? {}),
+    price: savedPrice === previousPrice ? currentPrice : savedPrice ?? defaultWorkspaceSubscription.price,
+    startedAt: stored.subscription?.startedAt ?? new Date().toISOString(),
+  };
+
+  return {
+    companyName: stored.companyName ?? "",
+    domain: stored.domain ?? "",
+    industry: stored.industry ?? "",
+    country: stored.country ?? "",
+    adminJobTitle: stored.adminJobTitle ?? "",
+    inviteCode: stored.inviteCode || createInviteCode(),
+    subscription,
+  };
 }
 
 export function AppDataProvider({ children }: { children: React.ReactNode }) {
@@ -16,11 +50,13 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   const [messages, setMessages] = useState(() => readStored("messages", seedMessages));
   const [settings, setSettings] = useState(() => readStored("settings", defaultSettings));
   const [accounts, setAccounts] = useState<Account[]>(() => readStored("accounts", []));
+  const [workspace, setWorkspace] = useState<LocalWorkspace | null>(readWorkspace);
   const [credentials, setCredentials] = useState<PasswordCredential[]>(() => readStored("credentials", []));
   const [sessionAccountId, setSessionAccountId] = useState<string | null>(() => readStored<string | null>("sessionAccountId", null));
   const initialAdminSetupStarted = useRef(false);
 
   useEffect(() => writeStored("accounts", accounts), [accounts]);
+  useEffect(() => writeStored("workspace", workspace), [workspace]);
   useEffect(() => writeStored("credentials", credentials), [credentials]);
   useEffect(() => writeStored("contacts", contacts), [contacts]);
   useEffect(() => writeStored("messages", messages), [messages]);
@@ -66,15 +102,21 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
       return {
       accounts,
       currentAccount,
+      workspace,
+      updateSubscription: (subscription) => setWorkspace((current) => current ? { ...current, subscription } : current),
       contacts,
       messages,
       settings,
-      addAccount: (input, password) => createLocalAccount(input, password),
-      createInitialAdmin: async (input, password) => {
+      addAccount: (input, password, signInAfterCreate = false) => createLocalAccount(input, password, signInAfterCreate),
+      createInitialAdmin: async (input, password, workspaceDetails, initialSettings) => {
         if (accounts.length > 0 || initialAdminSetupStarted.current) return "closed";
 
         initialAdminSetupStarted.current = true;
         const result = await createLocalAccount({ ...input, role: "Administrator" }, password, true);
+        if (result === "created" && workspaceDetails) {
+          setWorkspace(workspaceDetails);
+          if (initialSettings) setSettings(initialSettings);
+        }
         if (result !== "created") initialAdminSetupStarted.current = false;
         return result === "duplicate" ? "closed" : result;
       },
@@ -128,10 +170,17 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
       },
       updateMessage: (id, changes) => setMessages((current) => current.map((message) => (message.id === id ? { ...message, ...changes } : message))),
       deleteMessage: (id) => setMessages((current) => current.filter((message) => message.id !== id)),
-      updateSettings: (nextSettings: AppSettings) => setSettings(nextSettings),
+      updateSettings: (nextSettings: AppSettings) => {
+        setSettings(nextSettings);
+        if (currentAccount) {
+          setAccounts((current) => current.map((account) => account.id === currentAccount.id
+            ? { ...account, fullName: nextSettings.profile.fullName, email: nextSettings.profile.email.trim().toLowerCase(), phone: nextSettings.profile.phone }
+            : account));
+        }
+      },
       };
     },
-    [accounts, contacts, credentials, currentAccount, messages, settings],
+    [accounts, contacts, credentials, currentAccount, messages, settings, workspace],
   );
 
   return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>;

@@ -27,6 +27,38 @@ export interface AccountInput {
   role: string;
 }
 
+export type SubscriptionPlan = "Starter" | "Growth" | "Enterprise";
+export type BillingCycle = "monthly" | "yearly";
+export type SubscriptionStatus = "trial" | "active" | "payment_pending";
+
+export interface WorkspaceSubscription {
+  plan: SubscriptionPlan;
+  billingCycle: BillingCycle;
+  price: number;
+  seats: number;
+  startedAt: string;
+  status?: SubscriptionStatus;
+}
+
+export const defaultWorkspaceSubscription: WorkspaceSubscription = {
+  plan: "Starter",
+  billingCycle: "monthly",
+  price: 1500,
+  seats: 5,
+  startedAt: new Date().toISOString(),
+  status: "active",
+};
+
+export interface LocalWorkspace {
+  companyName: string;
+  domain: string;
+  industry: string;
+  country: string;
+  adminJobTitle: string;
+  inviteCode: string;
+  subscription: WorkspaceSubscription;
+}
+
 export type MessageFolder = "inbox" | "sent" | "archived";
 export type MessageDirection = "sent" | "received";
 
@@ -38,6 +70,7 @@ export interface Message {
   content: string;
   direction: MessageDirection;
   folder: MessageFolder;
+  previousFolder?: Exclude<MessageFolder, "archived">;
   read: boolean;
   createdAt: string;
 }

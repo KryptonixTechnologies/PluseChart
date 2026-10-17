@@ -13,7 +13,7 @@ function getInitials(name: string) {
 }
 
 function Settings() {
-  const { settings, updateSettings } = useAppData();
+  const { accounts, currentAccount, settings, updateSettings } = useAppData();
   const [draft, setDraft] = useState<AppSettings>(settings);
   const [feedback, setFeedback] = useState("");
 
@@ -38,8 +38,12 @@ function Settings() {
       setFeedback("Enter a name and valid email address before saving.");
       return;
     }
+    if (accounts.some((account) => account.id !== currentAccount?.id && account.email.toLowerCase() === draft.profile.email.trim().toLowerCase())) {
+      setFeedback("That email address is already used by another account.");
+      return;
+    }
     updateSettings(draft);
-    setFeedback("Settings saved locally.");
+    setFeedback("Settings saved in this browser.");
   };
 
   const cancel = () => {
@@ -53,7 +57,7 @@ function Settings() {
         <div>
           <span className="eyebrow">Workspace configuration</span>
           <h1>Settings</h1>
-          <p>Personalize your PulseChart workspace and control how updates reach you.</p>
+          <p>Personalize the profile and display preferences saved in this browser.</p>
         </div>
         <div className="settings-hero-status"><span className="status-pulse" />Local workspace</div>
       </div>
@@ -83,7 +87,7 @@ function Settings() {
 
             <div className="settings-note">
               <span className="settings-note-icon">i</span>
-              <p>Preferences are stored in this browser until a backend account service is connected.</p>
+              <p>Your settings and account data stay in this browser. No server or notification service is connected.</p>
             </div>
           </aside>
 
@@ -117,7 +121,7 @@ function Settings() {
                   ["weeklyReports", "Weekly reports", "Receive a weekly summary of communication activity."],
                 ] as const).map(([field, title, description]) => (
                   <div className="notification-setting" key={field}>
-                    <div><strong>{title}</strong><p>{description}</p></div>
+                    <div><strong>{title}</strong><p>{description} This preference is saved locally; notifications are not sent.</p></div>
                     <button type="button" className={draft.notifications[field] ? "toggle-switch active" : "toggle-switch"} onClick={() => updateNotification(field)} aria-label={`Toggle ${title}`} aria-pressed={draft.notifications[field]}><span /></button>
                   </div>
                 ))}
@@ -126,10 +130,10 @@ function Settings() {
 
             <section className="settings-card" id="system-settings">
               <div className="settings-card-header">
-                <div><span className="settings-section-kicker">03 / Display</span><h2>System preferences</h2><p>Set how records are displayed on this device.</p></div>
+                <div><span className="settings-section-kicker">03 / Display</span><h2>System preferences</h2><p>Set the time zone and date format used for message timestamps.</p></div>
               </div>
               <div className="preference-list">
-                <label className="preference-item"><span><strong>Language</strong><p>Select the language used throughout the system.</p></span><select value={draft.system.language} onChange={(event) => updateSystem("language", event.target.value)}><option>English</option><option>Swahili</option></select></label>
+                <label className="preference-item"><span><strong>Language</strong><p>English is currently the only interface language.</p></span><select value={draft.system.language} onChange={(event) => updateSystem("language", event.target.value)}><option>English</option></select></label>
                 <label className="preference-item"><span><strong>Time zone</strong><p>Set the time zone used for communication records.</p></span><select value={draft.system.timeZone} onChange={(event) => updateSystem("timeZone", event.target.value)}><option value="Africa/Nairobi">East Africa Time (EAT)</option><option value="UTC">UTC</option></select></label>
                 <label className="preference-item"><span><strong>Date format</strong><p>Choose how dates are displayed in the system.</p></span><select value={draft.system.dateFormat} onChange={(event) => updateSystem("dateFormat", event.target.value)}><option>DD/MM/YYYY</option><option>MM/DD/YYYY</option><option>YYYY-MM-DD</option></select></label>
               </div>

@@ -5,8 +5,9 @@ import { useAuth } from "../hooks/useAuth";
 
 function Layout() {
   const navigate = useNavigate();
-  const { currentAccount, settings, messages, signOut: clearLocalSession } = useAppData();
+  const { currentAccount, settings, messages } = useAppData();
   const { session, logout } = useAuth();
+  const isAdministrator = currentAccount?.role === "Administrator";
   const displayName = session?.user.name ?? currentAccount?.fullName ?? settings.profile.fullName;
   const displayRole = session?.user.role ?? currentAccount?.role ?? settings.profile.role;
   const initials = displayName.split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase();
@@ -69,26 +70,29 @@ function Layout() {
 
           <p className="nav-title">SYSTEM</p>
 
-          <NavLink
-            to="/settings"
-            className={({ isActive }) =>
-              isActive ? "nav-link active" : "nav-link"
-            }
-          >
-            <span>⚙</span>
-            Settings
-          </NavLink>
+          {isAdministrator && <>
+            <NavLink
+              to="/settings"
+              className={({ isActive }) =>
+                isActive ? "nav-link active" : "nav-link"
+              }
+            >
+              <span>⚙</span>
+              Settings
+            </NavLink>
 
-          <NavLink
-            to="/accounts"
-            title="Create account"
-            className={({ isActive }) =>
-              isActive ? "nav-link active" : "nav-link"
-            }
-          >
-            <span className="nav-icon"><UserPlus size={18} strokeWidth={1.8} aria-hidden="true" /></span>
-            Accounts
-          </NavLink>
+            <NavLink
+              to="/accounts"
+              title="Create account"
+              className={({ isActive }) =>
+                isActive ? "nav-link active" : "nav-link"
+              }
+            >
+              <span className="nav-icon"><UserPlus size={18} strokeWidth={1.8} aria-hidden="true" /></span>
+              Accounts
+            </NavLink>
+          </>}
+
         </nav>
 
         <div className="sidebar-footer">
@@ -120,7 +124,7 @@ function Layout() {
                 <span>{displayRole}</span>
               </div>
             </div>
-            <button className="signout-button" type="button" onClick={() => { logout(); clearLocalSession(); navigate("/login", { replace: true }); }}>Sign out</button>
+            <button className="signout-button" type="button" onClick={() => { logout(); navigate("/login", { replace: true }); }}>Sign out</button>
           </div>
         </header>
 

@@ -110,6 +110,11 @@
   font-size: 12px;
 }
 
+.tenant-auth-form select option {
+  background: #0a1a26;
+  color: #edf4f6;
+}
+
 .tenant-auth-form input::placeholder {
   color: #6f8793;
 }
@@ -133,7 +138,345 @@
 }
 
 .company-auth-card {
+  width: min(520px, 100%);
   margin: 24px 0;
+}
+
+.tenant-auth-flow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+  margin: 0 0 22px;
+}
+
+.tenant-auth-flow-item {
+  min-width: 0;
+}
+
+.tenant-auth-flow-node {
+  display: flex;
+  min-height: 86px;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 5px;
+  border: 1px solid #294653;
+  border-radius: 7px;
+  padding: 9px 7px;
+  background: #0b1d29;
+}
+
+.tenant-auth-flow-node::before {
+  color: #758e98;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+
+.tenant-auth-flow-node.stage-1::before { content: "01"; }
+.tenant-auth-flow-node.stage-2::before { content: "02"; }
+.tenant-auth-flow-node.stage-3::before { content: "03"; }
+.tenant-auth-flow-node.stage-4::before { content: "04"; }
+
+.tenant-auth-flow-node strong {
+  color: #dce8eb;
+  font-size: 9px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.tenant-auth-flow-node span {
+  color: #8198a2;
+  font-size: 8px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.tenant-auth-flow-node.current {
+  border-color: #58bb91;
+  background: linear-gradient(145deg, rgba(30, 105, 83, .3), #0b1d29 78%);
+  box-shadow: inset 0 2px #58bb91;
+}
+
+.tenant-auth-flow-node.current::before,
+.tenant-auth-flow-node.current strong {
+  color: #a9e7c8;
+}
+
+.tenant-auth-flow-node.complete {
+  border-color: #356c61;
+  background: #102b31;
+}
+
+.tenant-auth-flow-node.complete::before {
+  color: #75c8a2;
+}
+
+.tenant-auth-flow-connector {
+  display: none;
+}
+
+.tenant-auth-choice-toggle {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid #294653;
+  border-radius: 8px;
+  background: #091a26;
+}
+
+.tenant-auth-choice-toggle button {
+  min-width: 0;
+  min-height: 40px;
+  border: 0;
+  border-radius: 5px;
+  padding: 8px 10px;
+  background: transparent;
+  color: #9cb0b9;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: color .15s ease, background .15s ease;
+}
+
+.tenant-auth-choice-toggle button:hover {
+  color: #edf6f6;
+}
+
+.tenant-auth-choice-toggle button[aria-pressed="true"] {
+  background: #1a4250;
+  color: #b6f0d5;
+  box-shadow: inset 0 0 0 1px rgba(94, 196, 151, .32);
+}
+
+.tenant-auth-plan-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.tenant-auth-plan {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "name price"
+    "description seats";
+  align-items: center;
+  column-gap: 14px;
+  row-gap: 5px;
+  width: 100%;
+  min-height: 70px;
+  border: 1px solid #294653;
+  border-radius: 8px;
+  padding: 11px 13px;
+  background: #0b1d29;
+  color: #eaf2f4;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s ease, background .15s ease, transform .15s ease;
+}
+
+.tenant-auth-plan:hover {
+  transform: translateY(-1px);
+  border-color: #4d8d7a;
+  background: #102633;
+}
+
+.tenant-auth-plan:focus-visible,
+.tenant-auth-choice-toggle button:focus-visible {
+  outline: 2px solid #68cba5;
+  outline-offset: 2px;
+}
+
+.tenant-auth-plan.selected {
+  border-color: #58bb91;
+  background: linear-gradient(100deg, rgba(30, 105, 83, .28), #10232e 78%);
+  box-shadow: inset 3px 0 #58bb91;
+}
+
+.tenant-auth-plan strong {
+  grid-area: name;
+  color: #f0f7f7;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.tenant-auth-plan span {
+  grid-area: description;
+  color: #9bb0b9;
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.tenant-auth-plan b {
+  grid-area: price;
+  color: #a9e7c8;
+  font-size: 11px;
+  font-weight: 750;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.tenant-auth-plan small {
+  grid-area: seats;
+  color: #8097a1;
+  font-size: 9px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.tenant-auth-payment-note {
+  display: grid;
+  gap: 7px;
+  border: 1px solid #294653;
+  border-left: 3px solid #58bb91;
+  border-radius: 7px;
+  padding: 12px;
+  background: rgba(9, 26, 38, .76);
+}
+
+.tenant-auth-payment-note > strong {
+  color: #c9f0dd;
+  font-size: 11px;
+}
+
+.tenant-auth-payment-note > span {
+  color: #9bb0b9;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.tenant-auth-choice-toggle.compact button {
+  font-size: 10px;
+}
+
+.tenant-auth-progress {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 14px 0 22px;
+}
+
+.tenant-auth-progress span {
+  height: 4px;
+  border-radius: 999px;
+  background: #29414e;
+}
+
+.tenant-auth-progress span.complete {
+  background: linear-gradient(90deg, #328bb4, #36b98b);
+}
+
+.tenant-auth-step-actions {
+  display: grid;
+  grid-template-columns: minmax(90px, .6fr) 1.4fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.tenant-auth-step-actions .secondary-button {
+  min-height: 44px;
+}
+
+.tenant-auth-checkbox {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 10px !important;
+}
+
+.tenant-auth-checkbox input {
+  width: 16px;
+  min-height: 16px;
+  accent-color: #36b98b;
+}
+
+.tenant-auth-small-note,
+.tenant-auth-invite p {
+  margin: 0;
+  color: #91a6b1;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.tenant-auth-invite {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid #2a4655;
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.tenant-auth-invite > label {
+  color: #c9d8dd;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.tenant-auth-invite-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.tenant-auth-invite-row input {
+  min-width: 0;
+  min-height: 40px;
+  border: 1px solid #2a4655;
+  border-radius: 7px;
+  padding: 0 12px;
+  background: #091a26;
+  color: #edf4f6;
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: .12em;
+}
+
+.tenant-auth-invite-row .secondary-button,
+.tenant-auth-team-form > .secondary-button {
+  padding: 0 14px;
+  border: 1px solid #2a4655;
+  border-radius: 7px;
+  background: #142b38;
+  color: #dce8ec;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tenant-auth-team-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-top: 1px solid #233c4a;
+  padding-top: 14px;
+}
+
+.tenant-auth-team-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #c9d8dd;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.tenant-auth-team-form input,
+.tenant-auth-team-form select {
+  min-height: 40px;
+  border: 1px solid #2a4655;
+  border-radius: 7px;
+  padding: 0 12px;
+  background: #091a26;
+  color: #edf4f6;
+  font: inherit;
+  font-size: 12px;
+}
+
+.tenant-auth-team-form > .secondary-button {
+  min-height: 42px;
 }
 
 .tenant-auth-submit {
@@ -175,6 +518,49 @@
   text-decoration: underline;
 }
 
+.tenant-auth-account-link {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border: 1px solid #2a4655;
+  border-radius: 7px;
+  padding: 12px;
+  color: #edf4f6;
+  text-decoration: none;
+  transition: border-color .15s ease, background .15s ease;
+}
+
+.tenant-auth-account-link:hover,
+.tenant-auth-account-link:focus-visible {
+  border-color: #398aa3;
+  background: rgba(57, 138, 163, .12);
+}
+
+.tenant-auth-account-link span {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.tenant-auth-account-link small {
+  color: #91a6b1;
+  font-size: 10px;
+}
+
+.tenant-auth-notice {
+  margin-bottom: 16px;
+  border: 1px solid #2a4655;
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: #c9d8dd;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.tenant-auth-notice a {
+  color: #70d5af;
+  font-weight: 700;
+}
+
 .tenant-auth-error {
   margin: 0 0 16px;
   border: 1px solid #874550;
@@ -197,5 +583,36 @@
 @media (max-width: 480px) {
   .tenant-auth-card {
     padding: 27px 22px;
+  }
+
+  .tenant-auth-flow {
+    gap: 5px;
+  }
+
+  .tenant-auth-flow-node {
+    min-height: 62px;
+    gap: 4px;
+    padding: 7px 5px;
+  }
+
+  .tenant-auth-flow-node strong {
+    font-size: 8px;
+  }
+
+  .tenant-auth-flow-node span {
+    display: none;
+  }
+
+  .tenant-auth-plan {
+    column-gap: 8px;
+    padding: 10px;
+  }
+
+  .tenant-auth-plan b {
+    font-size: 10px;
+  }
+
+  .tenant-auth-plan small {
+    font-size: 8px;
   }
 }
