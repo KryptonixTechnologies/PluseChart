@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BadgeCheck, Check, CreditCard, Users } from "lucide-react";
+import { BadgeCheck, Check, CreditCard, Minus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAppData } from "../hooks/useAppData";
 import { useAuth } from "../hooks/useAuth";
@@ -7,28 +7,34 @@ import type { BillingCycle, SubscriptionPlan } from "../types/models";
 import { defaultWorkspaceSubscription } from "../types/models";
 import { formatKES } from "../services/currencyFormatting";
 
-const plans: { plan: SubscriptionPlan; monthlyPrice: number; seats: number; description: string; features: string[] }[] = [
+const plans: { plan: SubscriptionPlan; monthlyPrice: number; seats: number; description: string }[] = [
   {
     plan: "Starter",
     monthlyPrice: 1500,
     seats: 5,
     description: "The essentials for a focused team.",
-    features: ["Shared team inbox", "Contact management", "Basic activity reports"],
   },
   {
     plan: "Growth",
     monthlyPrice: 4900,
     seats: 20,
     description: "More room for a growing operation.",
-    features: ["Everything in Starter", "Up to 20 team accounts", "Expanded reporting"],
   },
   {
     plan: "Enterprise",
     monthlyPrice: 12000,
     seats: 50,
     description: "Capacity and visibility for larger teams.",
-    features: ["Everything in Growth", "Up to 50 team accounts", "Priority support"],
   },
+];
+
+const comparisonRows = [
+  { label: "Company accounts", values: ["Up to 5", "Up to 20", "Up to 50"] },
+  { label: "Shared team inbox", values: [true, true, true] },
+  { label: "Contact management", values: [true, true, true] },
+  { label: "Basic activity reports", values: [true, true, true] },
+  { label: "Expanded reporting", values: [false, true, true] },
+  { label: "Priority support", values: [false, false, true] },
 ];
 
 function Subscription() {
@@ -86,7 +92,7 @@ function Subscription() {
           <span className="subscription-eyebrow">CURRENT PACKAGE</span>
           <h2 id="current-plan-title">{workspace?.companyName || "Workspace"} <span>{activeSubscription.plan}</span></h2>
           <p>
-            {activeSubscription.seats} team accounts · {activeSubscription.billingCycle === "yearly" ? "Billed annually" : "Billed monthly"} · {activeSubscription.status === "trial" ? "Trial" : activeSubscription.status === "payment_pending" ? "Payment pending" : "Active"}
+            {activeSubscription.seats} company accounts · {activeSubscription.billingCycle === "yearly" ? "Billed annually" : "Billed monthly"} · {activeSubscription.status === "trial" ? "Trial" : activeSubscription.status === "payment_pending" ? "Payment pending" : "Active"}
           </p>
         </div>
         <div className="subscription-current-price">
@@ -106,23 +112,32 @@ function Subscription() {
         </div>
       </div>
 
-      <div className="subscription-plan-grid">
-        {plans.map((plan) => {
+      <div className="subscription-price-cards">
+        {plans.map((plan, index) => {
           const isCurrent = activeSubscription.plan === plan.plan && activeSubscription.billingCycle === billingCycle;
-
           return (
-            <article className={`subscription-plan${plan.plan === "Growth" ? " featured" : ""}`} key={plan.plan}>
-              {plan.plan === "Growth" && <span className="subscription-plan-label">MOST POPULAR</span>}
-              <h3>{plan.plan}</h3>
-              <p className="subscription-plan-description">{plan.description}</p>
-              <div className="subscription-plan-price">
+            <article className={`subscription-price-card plan-${plan.plan.toLowerCase()}`} key={plan.plan}>
+              <header className="subscription-price-card-header">
+                {plan.plan === "Growth" && <span className="subscription-price-card-popular">MOST POPULAR</span>}
+                <h3>{plan.plan}</h3>
+                <p>{plan.description}</p>
                 <strong>{formatKES(billingCycle === "yearly" ? plan.monthlyPrice * 10 : plan.monthlyPrice)}</strong>
                 <span>/{billingCycle === "yearly" ? "year" : "month"}</span>
-              </div>
-              {billingCycle === "yearly" && <p className="subscription-plan-equivalent">Equivalent to {formatKES(plan.monthlyPrice)}/month</p>}
-              <div className="subscription-plan-seats"><Users size={16} aria-hidden="true" /> Up to {plan.seats} team accounts</div>
-              <ul>
-                {plan.features.map((feature) => <li key={feature}><Check size={16} aria-hidden="true" />{feature}</li>)}
+                {billingCycle === "yearly" && <small>Equivalent to {formatKES(plan.monthlyPrice)}/month</small>}
+              </header>
+              <ul className="subscription-price-card-features">
+                {comparisonRows.map((row) => {
+                  const value = row.values[index];
+                  return (
+                    <li key={row.label}>
+                      {typeof value === "string"
+                        ? <><Check size={16} aria-hidden="true" /><span>{row.label}: <strong>{value}</strong></span></>
+                        : value
+                          ? <><Check size={16} aria-hidden="true" /><span>{row.label}</span></>
+                          : <><Minus size={16} aria-hidden="true" /><span className="not-included">{row.label}</span></>}
+                    </li>
+                  );
+                })}
               </ul>
               <button
                 className={isCurrent ? "subscription-plan-button current" : "subscription-plan-button"}
@@ -130,7 +145,7 @@ function Subscription() {
                 disabled={!workspace}
                 onClick={() => choosePlan(plan)}
               >
-                {isCurrent ? <><Check size={16} aria-hidden="true" /> Continue with {plan.plan}</> : <><CreditCard size={16} aria-hidden="true" /> Choose {plan.plan}</>}
+                {isCurrent ? <><Check size={16} aria-hidden="true" /> Current plan</> : <><CreditCard size={16} aria-hidden="true" /> Choose {plan.plan}</>}
               </button>
             </article>
           );

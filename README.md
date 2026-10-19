@@ -23,24 +23,30 @@ npm run preview
 
 The production build is written to `dist/`.
 
-## Local account setup
+## Workspaces, Invitations, and Sign-in
 
-- Open `/company-signup` to go through company details, Administrator account, workspace preferences, and team invite setup. Workspace details and preferences are saved in this browser, and the first Administrator is signed in when setup completes.
-- Sign in at `/login` with an account created in this browser.
-- Add additional local accounts from **Accounts**. New accounts are assigned the selected local role.
-- The setup wizard creates a workspace invite code. `/signup` checks the code against the workspace saved in this browser; it cannot invite people to another browser or device.
-- `/register` and `/sign-in` are aliases. `/setup` and `/onboarding` redirect to signup.
+- Open `/company-signup` to enter company details, administrator credentials, and a subscription choice. The setup wizard offers Starter (KSh 1,500/month), Growth (KSh 4,900/month), and Enterprise (KSh 12,000/month) plans, with monthly or annual billing. Annual billing is priced at ten monthly payments.
+- On successful setup, the administrator is signed in and shown a workspace invite code. Copy and share this code with one teammate.
+- The invited teammate opens `/signup`, enters the invite code, their name, email address, and a password of at least eight characters, then selects **Create account**. The account is created with the Member role and signed in automatically. `/signup/invite/:code` and the `code` or `invite` query parameters can prefill the code.
+- Each invite code can be redeemed once. To add more teammates, an administrator can create accounts from **Accounts**.
+- Invite validation uses the workspace data stored in the current browser profile. A code will not work in another browser or on another device because workspaces are not synchronized.
+- Sign in at `/login` using an account's email address and password. The sign-in form accepts manually entered credentials; it does not require choosing a saved account.
+- `/register` redirects to signup, `/sign-in` redirects to login, and `/setup` and `/onboarding` redirect to signup.
 
-Passwords are hashed in the browser with Web Crypto before the resulting credential is saved locally. The local login is a demo feature, not production authentication: browser storage is accessible to the user and is not protected by a server. Do not use it for sensitive or production accounts.
+Passwords are hashed in the browser with Web Crypto before the resulting credential is saved locally. This authentication is a demo feature, not production authentication: browser storage is accessible to the user and is not protected by a server. Do not use it for sensitive or production accounts.
+
+## Subscription and Billing
+
+Plan options appear as individual pricing cards during administrator setup and on the Subscription page. Annual prices equal ten monthly payments (two months free). Trial duration is not configured. Paid checkout is not connected, so no payment details are collected and no charge is made. Account limits are displayed on the plans but are not currently enforced by account creation.
 
 ## Workspace features
 
-- **Dashboard:** local communication totals, recent activity, and charts.
-- **Messages:** browse, search, compose, view, reply, archive, restore, and delete local messages.
-- **Contacts:** add, view, edit, delete, search, and filter local contacts.
-- **Reports:** review local communication totals, read rate, charts, and department summaries.
-- **Settings:** update the current local account profile, notification preferences, language, time zone, and date format.
-- **Accounts:** create additional local accounts and review the team directory.
+- **Dashboard:** communication totals, recent activity, and charts.
+- **Messages:** browse, search, compose, view, reply, archive, restore, and delete messages.
+- **Contacts:** add, view, edit, delete, search, and filter contacts.
+- **Reports:** review communication totals, read rate, charts, and department summaries.
+- **Settings:** update the current account profile, notification preferences, language, time zone, and date format.
+- **Accounts:** create additional accounts and review the team directory.
 
 Sample contacts and messages are added the first time the app runs in a browser.
 
@@ -48,7 +54,7 @@ Sample contacts and messages are added the first time the app runs in a browser.
 
 App data is kept in browser `localStorage`; it is not synchronized between browsers or devices, and it is not isolated between accounts on the same browser. Signing out does not remove locally saved app data. Clearing this site's browser storage removes the local workspace and its data.
 
-Invite codes are checked only against the workspace saved in the same browser; notifications are not sent, and there is no server-backed authentication, invitation delivery, payment processing, or tenant security. Use this app as a local frontend prototype only.
+Invite codes are checked only against the workspace saved in the same browser and can be redeemed once. Notifications are not sent, and there is no server-backed authentication, invitation delivery, payment processing, or tenant security. Use this app as a frontend prototype only.
 
 ## Project structure
 

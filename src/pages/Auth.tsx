@@ -1,11 +1,13 @@
 import { useState } from "react";
+import { Check, Minus } from "lucide-react";
 import { Link, Navigate, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useAppData } from "../hooks/useAppData";
 import type { CompanyRegistrationInput } from "../hooks/authContext";
-import type { AccountInput, NotificationPreferences, SystemPreferences } from "../types/models";
+import type { AccountInput } from "../types/models";
 import { defaultSettings } from "../data/seedData";
 import { formatKES } from "../services/currencyFormatting";
+import PasswordInput from "../components/PasswordInput";
 import "./auth.css";
 
 function AuthBrand() {
@@ -89,7 +91,7 @@ export function SignupPage() {
             <input required type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@company.com" />
           </label>
           <label>Password
-            <input required type="password" minLength={8} autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="At least 8 characters" />
+            <PasswordInput required minLength={8} autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="At least 8 characters" />
           </label>
           <button className="tenant-auth-submit" type="submit" disabled={isSubmitting}>{isSubmitting ? "Creating account..." : "Create account"}</button>
         </form>
@@ -104,7 +106,8 @@ export function CompanySignupPage() {
   const navigate = useNavigate();
   const { session, registerCompany } = useAuth();
   const { accounts, workspace, addAccount } = useAppData();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState<1 | 2>(1);
+  const [isComplete, setIsComplete] = useState(false);
   const [companyName, setCompanyName] = useState("");
   const [domain, setDomain] = useState("");
   const [industry, setIndustry] = useState("");
@@ -119,8 +122,6 @@ export function CompanySignupPage() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [inviteCode, setInviteCode] = useState("");
-  const [systemPreferences, setSystemPreferences] = useState<SystemPreferences>(defaultSettings.system);
-  const [notificationPreferences, setNotificationPreferences] = useState<NotificationPreferences>(defaultSettings.notifications);
   const [member, setMember] = useState<AccountInput>({ fullName: "", email: "", phone: "", role: "Staff" });
   const [memberPassword, setMemberPassword] = useState("");
   const [memberFeedback, setMemberFeedback] = useState("");
@@ -132,13 +133,19 @@ export function CompanySignupPage() {
     { plan: "Growth", price: 4900, seats: 20, description: "For growing communication teams." },
     { plan: "Enterprise", price: 12000, seats: 50, description: "Advanced operations and scaling." },
   ] as const;
-
+  const subscriptionComparisonRows: { label: string; values: (string | boolean)[] }[] = [
+    { label: "Company accounts", values: subscriptionOptions.map((option) => `Up to ${option.seats}`) },
+    { label: "Shared team inbox", values: [true, true, true] },
+    { label: "Contact management", values: [true, true, true] },
+    { label: "Basic activity reports", values: [true, true, true] },
+    { label: "Expanded reporting", values: [false, true, true] },
+    { label: "Priority support", values: [false, false, true] },
+  ];
   const selectedSubscription = subscriptionOptions.find((option) => option.plan === subscriptionPlan) ?? subscriptionOptions[0];
-  const flowStage = step <= 2 ? 1 : step === 3 ? 2 : step === 4 ? 3 : 4;
 
-  if (session && step === 1) return <Navigate to="/dashboard" replace />;
+  if (session && !isSubmitting && !isComplete) return <Navigate to="/dashboard" replace />;
 
-  if ((workspace || accounts.length > 0) && step === 1) {
+  if ((workspace || accounts.length > 0) && !isComplete) {
     return (
       <main className="tenant-auth-page">
         <section className="tenant-auth-card company-auth-card" aria-labelledby="existing-workspace-heading">
@@ -148,7 +155,7 @@ export function CompanySignupPage() {
           <p className="tenant-auth-description">
             {workspace
               ? `${workspace.companyName} is ready. Choose your account to continue.`
-              : "Choose a saved account to continue."}
+              : "Select an account to continue."}
           </p>
           {accounts.length > 0 ? (
             <div className="tenant-auth-form">
@@ -165,7 +172,7 @@ export function CompanySignupPage() {
             </div>
           ) : (
             <p className="tenant-auth-error" role="status">
-              No local sign-in account was found. Go to sign in to check another saved email, or clear this site's browser data to start over.
+              No sign-in account was found. Contact your workspace administrator for help.
             </p>
           )}
           <p className="tenant-auth-switch"><Link to="/login">Sign in with a different email</Link></p>
@@ -176,6 +183,16 @@ export function CompanySignupPage() {
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const normalizedDomain = domain.trim().replace(/^https?:\/\//i, "").replace(/\/+$/, "");
+    if (!/^(?=.{1,253}$)(?!-)[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+$/.test(normalizedDomain)) {
+      setError("Enter a valid company domain, such as company.co.ke.");
+      return;
+    }
+    if (password.length < 8) {
+      setError("Use a password with at least 8 characters.");
+      return;
+    }
+
     setIsSubmitting(true);
     setError("");
     try {
@@ -189,8 +206,8 @@ export function CompanySignupPage() {
         admin_password: password,
         admin_job_title: jobTitle.trim(),
         invite_code: crypto.randomUUID().replaceAll("-", "").slice(0, 8).toUpperCase(),
-        system_preferences: systemPreferences,
-        notification_preferences: notificationPreferences,
+        system_preferences: defaultSettings.system,
+        notification_preferences: defaultSettings.notifications,
         subscription: {
           plan: selectedSubscription.plan,
           billingCycle,
@@ -202,22 +219,12 @@ export function CompanySignupPage() {
       };
       await registerCompany(input);
       setInviteCode(input.invite_code);
-      setStep(5);
+      setIsComplete(true);
     } catch (registrationError) {
       setError(errorMessage(registrationError));
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const nextStep = () => {
-    setError("");
-    setStep((current) => Math.min(current + 1, 4));
-  };
-
-  const backStep = () => {
-    setError("");
-    setStep((current) => Math.max(current - 1, 1));
   };
 
   const addTeamMember = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -233,7 +240,7 @@ export function CompanySignupPage() {
       if (result !== "created") {
         setMemberFeedback(result === "duplicate"
           ? "An account with this email already exists."
-          : "Secure password storage is unavailable in this browser.");
+          : "Unable to securely save this password. Please try again.");
         return;
       }
       setMember({ fullName: "", email: "", phone: "", role: "Staff" });
@@ -253,129 +260,156 @@ export function CompanySignupPage() {
     }
   };
 
-  const validateStep = (event: React.FormEvent<HTMLFormElement>) => {
+  const continueToPackage = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (step === 1) {
-      const normalizedDomain = domain.trim().replace(/^https?:\/\//i, "").replace(/\/+$/, "");
-      if (!/^(?=.{1,253}$)(?!-)[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+$/.test(normalizedDomain)) {
-        setError("Enter a valid company domain, such as company.co.ke.");
-        return;
-      }
+    const normalizedDomain = domain.trim().replace(/^https?:\/\//i, "").replace(/\/+$/, "");
+    if (!/^(?=.{1,253}$)(?!-)[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+$/.test(normalizedDomain)) {
+      setError("Enter a valid company domain, such as company.co.ke.");
+      return;
     }
-    if (step === 2 && password.length < 8) {
+    if (password.length < 8) {
       setError("Use a password with at least 8 characters.");
       return;
     }
-    nextStep();
+    setError("");
+    setStep(2);
   };
 
-  return (
-    <main className="tenant-auth-page">
-      <section className="tenant-auth-card company-auth-card" aria-labelledby="company-signup-heading">
-        <AuthBrand />
-        <div className="tenant-auth-flow" aria-label={`Signup flow, stage ${flowStage} of 4`}>
-          {[
-            { title: "Company signs up", description: "Company name + admin details" },
-            { title: "Chooses a plan", description: "Trial or paid subscription + payment" },
-            { title: "Account provisioned", description: "Company + admin user created" },
-            { title: "Workspace ready", description: "Admin gets a signup link/code" },
-          ].map((flowStep, index) => {
-            const stage = index + 1;
-            const status = stage < flowStage ? "complete" : stage === flowStage ? "current" : "upcoming";
-            return (
-              <div className="tenant-auth-flow-item" key={flowStep.title}>
-                <div className={`tenant-auth-flow-node stage-${stage} ${status}`} aria-current={stage === flowStage ? "step" : undefined}>
-                  <strong>{flowStep.title}</strong>
-                  <span>{flowStep.description}</span>
-                </div>
-                {stage < 4 && <span className="tenant-auth-flow-connector" aria-hidden="true" />}
-              </div>
-            );
-          })}
-        </div>
-        <span className="tenant-auth-eyebrow">SIGNUP FLOW · STAGE {flowStage} OF 4</span>
-        <h1 id="company-signup-heading">
-          {step === 1 ? "Company details" : step === 2 ? "Administrator account" : step === 3 ? "Choose a plan" : step === 4 ? "Workspace preferences" : "Invite your team"}
-        </h1>
-        <p className="tenant-auth-description">
-          {step === 1 && "Add the basic details for your company workspace."}
-          {step === 2 && "Create the Administrator account you’ll use to sign in."}
-          {step === 3 && "Select a trial or paid plan before the company and admin account are provisioned."}
-          {step === 4 && "Choose how dates and notifications are handled before provisioning the workspace."}
-          {step === 5 && `${companyName} is set up. Share the invite code or add a team member now.`}
-        </p>
-        {error && <div className="tenant-auth-error" role="alert">{error}</div>}
-        {step === 1 && <form className="tenant-auth-form" onSubmit={validateStep}>
-          <label>Company name<input required autoComplete="organization" value={companyName} onChange={(event) => setCompanyName(event.target.value)} placeholder="e.g. Acme Health Group" /></label>
-          <label>Business web domain<input required autoComplete="url" value={domain} onChange={(event) => setDomain(event.target.value)} placeholder="company.co.ke" /></label>
-          <label>Industry<select required value={industry} onChange={(event) => setIndustry(event.target.value)}><option value="">Select your industry</option><option>Healthcare</option><option>Technology</option><option>Finance & Banking</option><option>Education</option><option>Retail & E-commerce</option><option>Professional Services</option><option>Manufacturing</option><option>Other</option></select></label>
-          <label>Country<select value={country} onChange={(event) => setCountry(event.target.value)}><option>Kenya</option><option>Uganda</option><option>Tanzania</option><option>Rwanda</option><option>Ethiopia</option><option>South Africa</option><option>Nigeria</option><option>Other</option></select></label>
-          <button className="tenant-auth-submit" type="submit">Continue to administrator setup</button>
-        </form>}
-        {step === 2 && <form className="tenant-auth-form" onSubmit={validateStep}>
-          <label>Full name<input required autoComplete="name" value={adminName} onChange={(event) => setAdminName(event.target.value)} placeholder="Your full name" /></label>
-          <label>Work email<input required type="email" autoComplete="email" value={adminEmail} onChange={(event) => setAdminEmail(event.target.value)} placeholder="you@company.co.ke" /></label>
-          <label>Job title<input required autoComplete="organization-title" value={jobTitle} onChange={(event) => setJobTitle(event.target.value)} placeholder="e.g. Founder or Operations Director" /></label>
-          <label>Password<input required type="password" minLength={8} autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="At least 8 characters" /></label>
-          <div className="tenant-auth-step-actions"><button className="secondary-button" type="button" onClick={backStep}>Back</button><button className="tenant-auth-submit" type="submit">Continue to plan selection</button></div>
-        </form>}
-        {step === 3 && <form className="tenant-auth-form" onSubmit={validateStep}>
-          <div className="tenant-auth-choice-toggle" role="group" aria-label="Subscription type">
-            <button type="button" aria-pressed={subscriptionMode === "trial"} onClick={() => setSubscriptionMode("trial")}>Start with a trial</button>
-            <button type="button" aria-pressed={subscriptionMode === "paid"} onClick={() => setSubscriptionMode("paid")}>Choose a paid plan</button>
-          </div>
-          <div className="tenant-auth-plan-grid" role="group" aria-label="Subscription plan">
-            {subscriptionOptions.map((option) => (
-              <button className={subscriptionPlan === option.plan ? "tenant-auth-plan selected" : "tenant-auth-plan"} type="button" key={option.plan} aria-pressed={subscriptionPlan === option.plan} onClick={() => setSubscriptionPlan(option.plan)}>
-                <strong>{option.plan}</strong>
-                <span>{option.description}</span>
-                <b>{subscriptionMode === "trial" ? "Free trial" : `${formatKES(billingCycle === "yearly" ? option.price * 10 : option.price)} / ${billingCycle === "yearly" ? "year" : "month"}`}</b>
-                <small>Up to {option.seats} team accounts</small>
-              </button>
-            ))}
-          </div>
-          {subscriptionMode === "paid" && <div className="tenant-auth-payment-note" role="status">
-            <strong>Payment step</strong>
-            <span>Checkout is not connected yet. No payment details are collected and no charge will be made; this plan will be saved as pending.</span>
-            <div className="tenant-auth-choice-toggle compact" role="group" aria-label="Billing cycle">
-              <button type="button" aria-pressed={billingCycle === "monthly"} onClick={() => setBillingCycle("monthly")}>Monthly</button>
-              <button type="button" aria-pressed={billingCycle === "yearly"} onClick={() => setBillingCycle("yearly")}>Yearly · 2 months free</button>
-            </div>
-          </div>}
-          {subscriptionMode === "trial" && <p className="tenant-auth-small-note">Trial duration and payment setup are not configured in this local build.</p>}
-          <div className="tenant-auth-step-actions"><button className="secondary-button" type="button" onClick={backStep}>Back</button><button className="tenant-auth-submit" type="submit">Continue to workspace setup</button></div>
-        </form>}
-        {step === 4 && <form className="tenant-auth-form" onSubmit={(event) => { event.preventDefault(); void submit(event); }}>
-          <label>Language<select value={systemPreferences.language} onChange={(event) => setSystemPreferences((current) => ({ ...current, language: event.target.value }))}><option>English</option></select></label>
-          <label>Time zone<select value={systemPreferences.timeZone} onChange={(event) => setSystemPreferences((current) => ({ ...current, timeZone: event.target.value }))}><option value="Africa/Nairobi">East Africa Time (EAT)</option><option value="UTC">UTC</option></select></label>
-          <label>Date format<select value={systemPreferences.dateFormat} onChange={(event) => setSystemPreferences((current) => ({ ...current, dateFormat: event.target.value }))}><option>DD/MM/YYYY</option><option>MM/DD/YYYY</option><option>YYYY-MM-DD</option></select></label>
-          {([
-            ["emailNotifications", "Email notifications"],
-            ["messageNotifications", "Message notifications"],
-            ["weeklyReports", "Weekly reports"],
-          ] as const).map(([field, label]) => <label className="tenant-auth-checkbox" key={field}><input type="checkbox" checked={notificationPreferences[field]} onChange={(event) => setNotificationPreferences((current) => ({ ...current, [field]: event.target.checked }))} />{label}</label>)}
-          <p className="tenant-auth-small-note">Notification preferences are saved for this workspace. No notifications are sent from this frontend.</p>
-          <div className="tenant-auth-step-actions"><button className="secondary-button" type="button" onClick={backStep}>Back</button><button className="tenant-auth-submit" type="submit" disabled={isSubmitting}>{isSubmitting ? "Provisioning account..." : "Provision account"}</button></div>
-        </form>}
-        {step === 5 && <div className="tenant-auth-form">
+  if (isComplete) {
+    return (
+      <main className="tenant-auth-page">
+        <section className="tenant-auth-card company-auth-card" aria-labelledby="workspace-ready-heading">
+          <AuthBrand />
+          <span className="tenant-auth-eyebrow">WORKSPACE READY</span>
+          <h1 id="workspace-ready-heading">{companyName} is set up</h1>
+          <p className="tenant-auth-description">Share the invite code or add a team member now.</p>
           <div className="tenant-auth-invite">
             <label htmlFor="workspace-invite-code">Workspace invite code</label>
             <div className="tenant-auth-invite-row"><input id="workspace-invite-code" readOnly value={inviteCode} /><button className="secondary-button" type="button" onClick={() => void copyInviteCode()}>Copy code</button></div>
-            <p>Team members can enter this code on the sign-up page in this browser.</p>
+            <p>Team members can enter this code on the sign-up page.</p>
             {copyFeedback && <span role="status">{copyFeedback}</span>}
           </div>
           <form className="tenant-auth-team-form" onSubmit={(event) => void addTeamMember(event)}>
             <div className="tenant-auth-section-label">ADD A TEAM MEMBER</div>
             <label>Full name<input required value={member.fullName} onChange={(event) => setMember((current) => ({ ...current, fullName: event.target.value }))} /></label>
             <label>Email address<input required type="email" value={member.email} onChange={(event) => setMember((current) => ({ ...current, email: event.target.value }))} /></label>
-            <label>Role<select value={member.role} onChange={(event) => setMember((current) => ({ ...current, role: event.target.value }))}><option>Staff</option><option>Manager</option><option>Clinician</option></select></label>
-            <label>Password<input required type="password" minLength={8} value={memberPassword} onChange={(event) => setMemberPassword(event.target.value)} placeholder="At least 8 characters" /></label>
+            <label>Role<select value={member.role} onChange={(event) => setMember((current) => ({ ...current, role: event.target.value }))}><option>Staff</option><option>Manager</option></select></label>
+            <label>Password<PasswordInput required minLength={8} autoComplete="new-password" value={memberPassword} onChange={(event) => setMemberPassword(event.target.value)} placeholder="At least 8 characters" /></label>
             {memberFeedback && <div className="tenant-auth-notice" role="status">{memberFeedback}</div>}
             <button className="secondary-button" type="submit" disabled={isAddingMember}>{isAddingMember ? "Adding member..." : "Add team member"}</button>
           </form>
           <button className="tenant-auth-submit" type="button" onClick={() => navigate("/dashboard", { replace: true })}>Go to workspace</button>
-        </div>}
-        {step < 5 && <p className="tenant-auth-switch"><Link to="/login">Already have an account? Sign in</Link></p>}
+        </section>
+      </main>
+    );
+  }
+
+  return (
+    <main className="tenant-auth-page company-signup-page">
+      <section className="tenant-auth-card company-auth-card company-signup-card" aria-labelledby="company-signup-heading">
+        <AuthBrand />
+        <div className="company-signup-progress" aria-label={`Signup step ${step} of 2`}>
+          <div className={step === 1 ? "current" : "complete"}><span>01</span><strong>Company & administrator</strong></div>
+          <div className={step === 2 ? "current" : "upcoming"}><span>02</span><strong>Subscription package</strong></div>
+        </div>
+        <span className="tenant-auth-eyebrow">STEP {step} OF 2 · {step === 1 ? "COMPANY SETUP" : "SUBSCRIPTION"}</span>
+        <h1 id="company-signup-heading">{step === 1 ? "Create your workspace" : "Choose your package"}</h1>
+        <p className="tenant-auth-description">
+          {step === 1
+            ? "Enter your company details and administrator account to continue."
+            : "Choose a trial or paid package for your team. Your company and administrator details are saved."}
+        </p>
+        {error && <div className="tenant-auth-error" role="alert">{error}</div>}
+        {step === 1 ? (
+          <form className="tenant-auth-form company-signup-form" onSubmit={continueToPackage}>
+            <div className="company-signup-form-grid">
+              <section className="company-signup-section" aria-labelledby="company-details-heading">
+                <div className="company-signup-section-heading"><span>01</span><div><h2 id="company-details-heading">Company details</h2><p>Basic information for your workspace.</p></div></div>
+                <div className="company-signup-fields">
+                  <label>Company name<input required autoComplete="organization" value={companyName} onChange={(event) => setCompanyName(event.target.value)} placeholder="e.g. Acme Health Group" /></label>
+                  <label>Business web domain<input required autoComplete="url" value={domain} onChange={(event) => setDomain(event.target.value)} placeholder="company.co.ke" /></label>
+                  <label>Industry<select required value={industry} onChange={(event) => setIndustry(event.target.value)}><option value="">Select your industry</option><option>Healthcare</option><option>Technology</option><option>Finance & Banking</option><option>Education</option><option>Retail & E-commerce</option><option>Professional Services</option><option>Manufacturing</option><option>Other</option></select></label>
+                  <label>Country<select value={country} onChange={(event) => setCountry(event.target.value)}><option>Kenya</option><option>Uganda</option><option>Tanzania</option><option>Rwanda</option><option>Ethiopia</option><option>South Africa</option><option>Nigeria</option><option>Other</option></select></label>
+                </div>
+              </section>
+
+              <section className="company-signup-section" aria-labelledby="administrator-heading">
+                <div className="company-signup-section-heading"><span>02</span><div><h2 id="administrator-heading">Administrator</h2><p>Sign-in details for the workspace owner.</p></div></div>
+                <div className="company-signup-fields">
+                  <label>Full name<input required autoComplete="name" value={adminName} onChange={(event) => setAdminName(event.target.value)} placeholder="Your full name" /></label>
+                  <label>Work email<input required type="email" autoComplete="email" value={adminEmail} onChange={(event) => setAdminEmail(event.target.value)} placeholder="you@company.co.ke" /></label>
+                  <label>Job title<input required autoComplete="organization-title" value={jobTitle} onChange={(event) => setJobTitle(event.target.value)} placeholder="e.g. Founder or Operations Director" /></label>
+                  <label>Password<PasswordInput required minLength={8} autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="At least 8 characters" /></label>
+                </div>
+              </section>
+            </div>
+            <button className="tenant-auth-submit company-signup-submit" type="submit">Continue to subscription</button>
+          </form>
+        ) : (
+          <form className="tenant-auth-form company-signup-form" onSubmit={(event) => void submit(event)}>
+            <section className="company-signup-section company-signup-plan-section" aria-labelledby="package-heading">
+              <div className="company-signup-section-heading"><span>02</span><div><h2 id="package-heading">Subscription package</h2><p>Select a plan for {companyName}.</p></div></div>
+              <div className="company-signup-summary">
+                <span>Administrator</span>
+                <strong>{adminName}</strong>
+                <small>{adminEmail} · {jobTitle}</small>
+              </div>
+              <div className="tenant-auth-choice-toggle" role="group" aria-label="Subscription type">
+                <button type="button" aria-pressed={subscriptionMode === "trial"} onClick={() => setSubscriptionMode("trial")}>Start with a trial</button>
+                <button type="button" aria-pressed={subscriptionMode === "paid"} onClick={() => setSubscriptionMode("paid")}>Choose a paid plan</button>
+              </div>
+              <div className="company-package-cards" role="group" aria-label="Subscription packages">
+                {subscriptionOptions.map((option, index) => {
+                  const isSelected = subscriptionPlan === option.plan;
+                  return (
+                    <article className={`company-package-card package-${option.plan.toLowerCase()}${isSelected ? " selected" : ""}`} key={option.plan}>
+                      <button className="company-package-card-header" type="button" aria-pressed={isSelected} onClick={() => setSubscriptionPlan(option.plan)}>
+                        <strong>{option.plan}</strong>
+                        <span>{formatKES(billingCycle === "yearly" ? option.price * 10 : option.price)}</span>
+                        <small>/{billingCycle === "yearly" ? "year" : "month"}</small>
+                        <small>{subscriptionMode === "trial"
+                          ? isSelected ? "Trial selected" : "Trial available"
+                          : isSelected ? "Selected" : "Select plan"}</small>
+                      </button>
+                      <p className="company-package-card-description">{option.description}</p>
+                      <ul className="company-package-card-features">
+                        {subscriptionComparisonRows.map((row) => {
+                          const value = row.values[index];
+                          return (
+                            <li key={row.label}>
+                              {typeof value === "string"
+                                ? <><Check size={15} aria-hidden="true" /><span>{row.label}: <strong>{value}</strong></span></>
+                                : value
+                                  ? <><Check size={15} aria-hidden="true" /><span>{row.label}</span></>
+                                  : <><Minus size={15} aria-hidden="true" /><span className="not-included">{row.label}</span></>}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                      <button className="company-package-card-select" type="button" aria-pressed={isSelected} onClick={() => setSubscriptionPlan(option.plan)}>
+                        {isSelected ? subscriptionMode === "trial" ? "Trial selected" : "Selected" : `Select ${option.plan}`}
+                      </button>
+                    </article>
+                  );
+                })}
+              </div>
+              {subscriptionMode === "paid" && <div className="tenant-auth-payment-note" role="status">
+                <strong>Payment setup</strong>
+                <span>Checkout is not connected. No payment details are collected and no charge will be made.</span>
+                <div className="tenant-auth-choice-toggle compact" role="group" aria-label="Billing cycle">
+                  <button type="button" aria-pressed={billingCycle === "monthly"} onClick={() => setBillingCycle("monthly")}>Monthly</button>
+                  <button type="button" aria-pressed={billingCycle === "yearly"} onClick={() => setBillingCycle("yearly")}>Yearly · 2 months free</button>
+                </div>
+              </div>}
+              {subscriptionMode === "trial" && <p className="tenant-auth-small-note">Trial duration and payment setup are not configured yet.</p>}
+            </section>
+            <div className="tenant-auth-step-actions company-signup-step-actions">
+              <button className="secondary-button" type="button" onClick={() => { setError(""); setStep(1); }}>Back</button>
+              <button className="tenant-auth-submit" type="submit" disabled={isSubmitting}>{isSubmitting ? "Creating workspace..." : "Create workspace"}</button>
+            </div>
+          </form>
+        )}
+        <p className="tenant-auth-switch"><Link to="/login">Already have an account? Sign in</Link></p>
       </section>
     </main>
   );
@@ -386,15 +420,11 @@ export function LoginPage() {
   const [searchParams] = useSearchParams();
   const { accounts, workspace } = useAppData();
   const { session, login } = useAuth();
-  const [email, setEmail] = useState(() => searchParams.get("email") ?? accounts[0]?.email ?? "");
+  const [email, setEmail] = useState(() => searchParams.get("email") ?? "");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const destination = accounts.find((account) => account.email.toLowerCase() === email.trim().toLowerCase())?.role === "Administrator"
-    ? "/subscription"
-    : "/dashboard";
-
-  if (session) return <Navigate to={session.user.role === "Administrator" ? "/subscription" : "/dashboard"} replace />;
+  if (session) return <Navigate to="/dashboard" replace />;
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -402,7 +432,7 @@ export function LoginPage() {
     setError("");
     try {
       await login(email.trim(), password);
-      navigate(destination, { replace: true });
+      navigate("/dashboard", { replace: true });
     } catch (loginError) {
       setError(errorMessage(loginError));
     } finally {
@@ -417,36 +447,24 @@ export function LoginPage() {
         <span className="tenant-auth-eyebrow">MEMBER ACCESS</span>
         <h1 id="login-heading">Welcome back</h1>
         <p className="tenant-auth-description">
-          {workspace ? `Sign in to ${workspace.companyName} with an account saved in this browser.` : "Sign in with an account saved in this browser."}
+          {workspace ? `Sign in to ${workspace.companyName} using your work email and password.` : "Sign in using your work email and password."}
         </p>
         {accounts.length === 0 && (
           <div className="tenant-auth-notice" role="status">
-            No saved accounts were found in this browser. <Link to="/company-signup">Create a local workspace</Link> to get started.
+            No account was found. <Link to="/company-signup">Create a company workspace</Link> to get started.
           </div>
         )}
         {error && <div className="tenant-auth-error" role="alert">{error}</div>}
         <form className="tenant-auth-form" onSubmit={submit}>
-          {accounts.length > 1 ? (
-            <label>Choose saved account
-              <select value={email} onChange={(event) => setEmail(event.target.value)}>
-                <option value="">Choose your account</option>
-                {accounts.map((account) => <option key={account.id} value={account.email}>{account.fullName} · {account.email}</option>)}
-              </select>
-            </label>
-          ) : (
-            <label>Email address
-              <input required type="email" autoComplete="username" list="saved-account-emails" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@company.com" />
-              <datalist id="saved-account-emails">
-                {accounts.map((account) => <option key={account.id} value={account.email}>{account.fullName}</option>)}
-              </datalist>
-            </label>
-          )}
+          <label>Email address
+            <input required type="email" autoComplete="username" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@company.com" />
+          </label>
           <label>Password
-            <input required type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Your password" />
+            <PasswordInput required autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Your password" />
           </label>
           <button className="tenant-auth-submit" type="submit" disabled={isSubmitting}>{isSubmitting ? "Signing in..." : "Sign in"}</button>
         </form>
-        {workspace && <p className="tenant-auth-switch">Need another local account? Add one after signing in from the Accounts page.</p>}
+        {workspace && <p className="tenant-auth-switch">Have an invite code? <Link to="/signup">Join this workspace</Link></p>}
         {!workspace && <p className="tenant-auth-switch">New to PulseChart? <Link to="/company-signup">Create a company workspace</Link></p>}
       </section>
     </main>

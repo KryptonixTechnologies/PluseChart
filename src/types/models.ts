@@ -56,6 +56,7 @@ export interface LocalWorkspace {
   country: string;
   adminJobTitle: string;
   inviteCode: string;
+  inviteCodeUsed?: boolean;
   subscription: WorkspaceSubscription;
 }
 

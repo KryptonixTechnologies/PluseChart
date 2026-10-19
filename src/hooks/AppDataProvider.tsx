@@ -41,6 +41,7 @@ function readWorkspace(): LocalWorkspace | null {
     country: stored.country ?? "",
     adminJobTitle: stored.adminJobTitle ?? "",
     inviteCode: stored.inviteCode || createInviteCode(),
+    inviteCodeUsed: stored.inviteCodeUsed ?? false,
     subscription,
   };
 }
@@ -54,6 +55,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   const [credentials, setCredentials] = useState<PasswordCredential[]>(() => readStored("credentials", []));
   const [sessionAccountId, setSessionAccountId] = useState<string | null>(() => readStored<string | null>("sessionAccountId", null));
   const initialAdminSetupStarted = useRef(false);
+  const inviteRegistrationInProgress = useRef(false);
 
   useEffect(() => writeStored("accounts", accounts), [accounts]);
   useEffect(() => writeStored("workspace", workspace), [workspace]);
@@ -104,10 +106,59 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
       currentAccount,
       workspace,
       updateSubscription: (subscription) => setWorkspace((current) => current ? { ...current, subscription } : current),
+      registerInvitedAccount: async (input, password, inviteCode) => {
+        const normalizedInviteCode = inviteCode.trim().toUpperCase();
+        if (!workspace || workspace.inviteCodeUsed || inviteRegistrationInProgress.current || workspace.inviteCode.toUpperCase() !== normalizedInviteCode) {
+          return "invalid_invite";
+        }
+
+        inviteRegistrationInProgress.current = true;
+        const result = await createLocalAccount(input, password, true);
+        if (result === "created") {
+          setWorkspace((current) => current ? { ...current, inviteCodeUsed: true } : current);
+        } else {
+          inviteRegistrationInProgress.current = false;
+        }
+        return result;
+      },
       contacts,
       messages,
       settings,
       addAccount: (input, password, signInAfterCreate = false) => createLocalAccount(input, password, signInAfterCreate),
+      updateAccount: async (id, input, password) => {
+        const email = input.email.trim().toLowerCase();
+        if (accounts.some((account) => account.id !== id && account.email.toLowerCase() === email)) return "duplicate";
+        const account = accounts.find((item) => item.id === id);
+        if (!account) return "not_found";
+
+        let nextCredential: PasswordCredential | null = null;
+        if (password) {
+          try {
+            nextCredential = await createPasswordCredential(id, password);
+          } catch {
+            return "unavailable";
+          }
+        }
+
+        const updatedAccount = { ...account, ...input, email };
+        setAccounts((current) => current.map((item) => item.id === id ? updatedAccount : item));
+        if (nextCredential) {
+          setCredentials((current) => [...current.filter((credential) => credential.accountId !== id), nextCredential]);
+        }
+        if (currentAccount?.id === id) {
+          setSettings((current) => ({
+            ...current,
+            profile: { ...current.profile, fullName: updatedAccount.fullName, email: updatedAccount.email, phone: updatedAccount.phone, role: updatedAccount.role },
+          }));
+        }
+        return "updated";
+      },
+      deleteAccount: (id) => {
+        if (currentAccount?.id === id || !accounts.some((account) => account.id === id)) return false;
+        setAccounts((current) => current.filter((account) => account.id !== id));
+        setCredentials((current) => current.filter((credential) => credential.accountId !== id));
+        return true;
+      },
       createInitialAdmin: async (input, password, workspaceDetails, initialSettings) => {
         if (accounts.length > 0 || initialAdminSetupStarted.current) return "closed";
 

@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { ContactRound, UserPlus } from "lucide-react";
+import { ContactRound, CreditCard, UserPlus } from "lucide-react";
 import { useAppData } from "../hooks/useAppData";
 import { useAuth } from "../hooks/useAuth";
 
@@ -90,6 +90,14 @@ function Layout() {
             >
               <span className="nav-icon"><UserPlus size={18} strokeWidth={1.8} aria-hidden="true" /></span>
               Accounts
+            </NavLink>
+
+            <NavLink
+              to="/subscription"
+              className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
+            >
+              <span className="nav-icon"><CreditCard size={18} strokeWidth={1.8} aria-hidden="true" /></span>
+              Subscription
             </NavLink>
           </>}
 

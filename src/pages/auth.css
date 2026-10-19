@@ -126,6 +126,19 @@
   outline-offset: 1px;
 }
 
+.tenant-auth-form .password-visibility-toggle {
+  color: #8fa7b2;
+}
+
+.tenant-auth-form .password-visibility-toggle:hover {
+  background: #173442;
+  color: #b8eed4;
+}
+
+.tenant-auth-form .password-visibility-toggle:focus-visible {
+  outline-color: #68cba5;
+}
+
 .tenant-auth-section-label {
   margin-top: 3px;
   border-top: 1px solid #233c4a;
@@ -140,6 +153,357 @@
 .company-auth-card {
   width: min(520px, 100%);
   margin: 24px 0;
+}
+
+.company-signup-page {
+  place-items: start center;
+  min-width: 0;
+}
+
+.company-signup-card {
+  width: min(980px, 100%);
+  min-width: 0;
+  margin: 26px 0;
+  padding: 34px;
+}
+
+.company-signup-card .tenant-auth-brand {
+  margin-bottom: 24px;
+}
+
+.company-signup-card > h1 {
+  font-size: 32px;
+}
+
+.company-signup-progress {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0 0 24px;
+}
+
+.company-signup-progress > div {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #294653;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #0b1d29;
+  color: #9bb0b9;
+}
+
+.company-signup-progress > div > span {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 6px;
+  background: #18323d;
+  color: #a4bbc4;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.company-signup-progress strong {
+  font-size: 10px;
+  line-height: 1.3;
+}
+
+.company-signup-progress > div.current {
+  border-color: #58bb91;
+  background: linear-gradient(100deg, rgba(30, 105, 83, .25), #0b1d29 78%);
+  color: #dff4e9;
+}
+
+.company-signup-progress > div.current > span,
+.company-signup-progress > div.complete > span {
+  background: #1c654f;
+  color: #c5f2d9;
+}
+
+.company-signup-progress > div.complete {
+  border-color: #356c61;
+  color: #b5d6c8;
+}
+
+.company-signup-form {
+  gap: 18px;
+}
+
+.company-signup-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.company-signup-section {
+  min-width: 0;
+  border: 1px solid #294653;
+  border-radius: 9px;
+  padding: 17px;
+  background: rgba(9, 26, 38, .66);
+}
+
+.company-signup-plan-section {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.company-signup-section-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.company-signup-section-heading > span {
+  display: grid;
+  width: 27px;
+  height: 27px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid #376354;
+  border-radius: 6px;
+  background: #12342f;
+  color: #9be3c3;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.company-signup-section-heading h2 {
+  margin: 0 0 4px;
+  color: #edf5f6;
+  font-size: 14px;
+}
+
+.company-signup-section-heading p {
+  margin: 0;
+  color: #8fa6b0;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.company-signup-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px 14px;
+}
+
+.company-signup-fields > label {
+  min-width: 0;
+}
+
+.company-signup-plan-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.company-signup-plan-grid .tenant-auth-plan {
+  min-height: 82px;
+}
+
+.company-package-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 13px;
+}
+
+.company-package-card {
+  --package-accent: #df5b2b;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #dce3e4;
+  border-radius: 9px;
+  background: #fff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .14);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.company-package-card.package-growth {
+  --package-accent: #d89524;
+}
+
+.company-package-card.package-enterprise {
+  --package-accent: #1596a3;
+}
+
+.company-package-card.selected {
+  border-color: var(--package-accent);
+  box-shadow: 0 0 0 2px var(--package-accent), 0 12px 24px rgba(0, 0, 0, .16);
+  transform: translateY(-3px);
+}
+
+.company-package-card-header {
+  display: flex;
+  min-height: 136px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 5px;
+  border: 0;
+  padding: 17px 16px 25px;
+  background: var(--package-accent);
+  color: #fff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.company-package-card-header:focus-visible,
+.company-package-card-select:focus-visible {
+  outline: 3px solid #132b37;
+  outline-offset: -5px;
+}
+
+.company-package-card-header strong {
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.company-package-card-header span {
+  margin-top: 4px;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.company-package-card-header small {
+  color: rgba(255, 255, 255, .92);
+  font-size: 10px;
+}
+
+.company-package-card-description {
+  min-height: 42px;
+  padding: 12px 14px 0;
+  margin: 0;
+  color: #5d6d70;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.company-package-card-features {
+  display: grid;
+  gap: 10px;
+  padding: 13px 14px 16px;
+  margin: 0;
+  list-style: none;
+}
+
+.company-package-card-features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  color: #35464a;
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.company-package-card-features li > span {
+  min-width: 0;
+}
+
+.company-package-card-features li > span strong {
+  display: block;
+  margin-top: 2px;
+  color: #35464a;
+  font-size: 10px;
+}
+
+.company-package-card-features li svg {
+  flex: 0 0 auto;
+  color: var(--package-accent);
+}
+
+.company-package-card-features li .not-included {
+  color: #94a0a2;
+}
+
+.company-package-card-select {
+  min-height: 35px;
+  margin: auto 14px 14px;
+  border: 1px solid var(--package-accent);
+  border-radius: 999px;
+  padding: 0 12px;
+  background: var(--package-accent);
+  color: #fff;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.company-package-card-select[aria-pressed="true"] {
+  background: #fff;
+  color: var(--package-accent);
+}
+
+.company-signup-summary {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin-bottom: 14px;
+  border: 1px solid #294653;
+  border-radius: 7px;
+  padding: 11px 13px;
+  background: #0b1d29;
+}
+
+.company-signup-summary > span {
+  grid-row: span 2;
+  align-self: center;
+  color: #9bb0b9;
+  font-size: 10px;
+}
+
+.company-signup-summary strong {
+  color: #edf5f6;
+  font-size: 11px;
+}
+
+.company-signup-summary small {
+  color: #8fa6b0;
+  font-size: 10px;
+}
+
+.company-signup-step-actions {
+  grid-template-columns: minmax(110px, .4fr) 1fr;
+}
+
+.company-signup-step-actions .tenant-auth-submit {
+  margin-top: 0;
+}
+
+.company-signup-notifications {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.company-signup-notifications .tenant-auth-checkbox {
+  min-width: 0;
+  border: 1px solid #294653;
+  border-radius: 7px;
+  padding: 10px;
+  background: #0b1d29;
+  color: #c9d8dd;
+  font-size: 10px;
+}
+
+.company-signup-notifications .tenant-auth-checkbox input {
+  flex: 0 0 auto;
+}
+
+.company-signup-submit {
+  min-height: 48px;
+  margin-top: 0;
 }
 
 .tenant-auth-flow {
@@ -614,5 +978,55 @@
 
   .tenant-auth-plan small {
     font-size: 8px;
+  }
+}
+
+@media (max-width: 760px) {
+  .company-signup-card {
+    padding: 27px 22px;
+  }
+
+  .company-signup-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .company-signup-plan-section {
+    grid-column: auto;
+  }
+
+  .company-signup-plan-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .company-signup-notifications {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .company-signup-card {
+    padding: 22px 16px;
+  }
+
+  .company-signup-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .company-signup-card > h1 {
+    font-size: 26px;
+  }
+
+  .company-signup-progress > div {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 9px;
+  }
+
+  .company-signup-progress strong {
+    font-size: 9px;
+  }
+
+  .company-signup-step-actions {
+    grid-template-columns: 1fr;
   }
 }

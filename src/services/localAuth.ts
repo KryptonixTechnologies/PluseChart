@@ -17,7 +17,7 @@ function decodeBase64(value: string) {
 
 async function deriveHash(password: string, salt: Uint8Array) {
   if (!globalThis.crypto?.subtle) {
-    throw new Error("Secure password hashing is unavailable in this browser context.");
+    throw new Error("Secure password hashing is unavailable. Please try again.");
   }
 
   const key = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);

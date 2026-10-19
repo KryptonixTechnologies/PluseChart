@@ -6,10 +6,13 @@ export interface AppDataContextValue {
   currentAccount: Account | null;
   workspace: LocalWorkspace | null;
   updateSubscription: (subscription: WorkspaceSubscription) => void;
+  registerInvitedAccount: (input: AccountInput, password: string, inviteCode: string) => Promise<"created" | "duplicate" | "unavailable" | "invalid_invite">;
   contacts: Contact[];
   messages: Message[];
   settings: AppSettings;
   addAccount: (input: AccountInput, password: string, signInAfterCreate?: boolean) => Promise<"created" | "duplicate" | "unavailable">;
+  updateAccount: (id: string, input: AccountInput, password?: string) => Promise<"updated" | "duplicate" | "unavailable" | "not_found">;
+  deleteAccount: (id: string) => boolean;
   createInitialAdmin: (input: AccountInput, password: string, workspace?: LocalWorkspace, initialSettings?: AppSettings) => Promise<"created" | "closed" | "unavailable">;
   signIn: (email: string, password: string) => Promise<boolean>;
   signOut: () => void;

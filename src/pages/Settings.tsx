@@ -43,7 +43,7 @@ function Settings() {
       return;
     }
     updateSettings(draft);
-    setFeedback("Settings saved in this browser.");
+    setFeedback("Settings saved.");
   };
 
   const cancel = () => {
@@ -57,9 +57,9 @@ function Settings() {
         <div>
           <span className="eyebrow">Workspace configuration</span>
           <h1>Settings</h1>
-          <p>Personalize the profile and display preferences saved in this browser.</p>
+          <p>Personalize your profile and display preferences.</p>
         </div>
-        <div className="settings-hero-status"><span className="status-pulse" />Local workspace</div>
+        <div className="settings-hero-status"><span className="status-pulse" />Workspace active</div>
       </div>
 
       {feedback && <div className="feedback success" role="status">{feedback}</div>}
@@ -85,10 +85,6 @@ function Settings() {
               ))}
             </nav>
 
-            <div className="settings-note">
-              <span className="settings-note-icon">i</span>
-              <p>Your settings and account data stay in this browser. No server or notification service is connected.</p>
-            </div>
           </aside>
 
           <div className="settings-content">
@@ -121,7 +117,7 @@ function Settings() {
                   ["weeklyReports", "Weekly reports", "Receive a weekly summary of communication activity."],
                 ] as const).map(([field, title, description]) => (
                   <div className="notification-setting" key={field}>
-                    <div><strong>{title}</strong><p>{description} This preference is saved locally; notifications are not sent.</p></div>
+                    <div><strong>{title}</strong><p>{description} Notifications are not sent.</p></div>
                     <button type="button" className={draft.notifications[field] ? "toggle-switch active" : "toggle-switch"} onClick={() => updateNotification(field)} aria-label={`Toggle ${title}`} aria-pressed={draft.notifications[field]}><span /></button>
                   </div>
                 ))}
