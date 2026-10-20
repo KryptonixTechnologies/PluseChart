@@ -110,7 +110,7 @@ function Accounts() {
             <div className="accounts-fields">
               <label className="form-group">Full name<input required autoComplete="name" placeholder="e.g. Amina Otieno" value={draft.fullName} onChange={(event) => updateField("fullName", event.target.value)} /></label>
               <label className="form-group">Work email<input required type="email" autoComplete="email" placeholder="name@organization.com" value={draft.email} onChange={(event) => updateField("email", event.target.value)} /></label>
-              <label className="form-group">{editingAccountId ? "New password (optional)" : "Password"}<PasswordInput required={!editingAccountId} autoComplete="new-password" minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} /></label>
+              <label className="form-group">{editingAccountId ? "New password (optional)" : "Password"}<PasswordInput required={!editingAccountId} autoComplete="new-password" minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} onGeneratePassword={setPassword} /></label>
               <label className="form-group"><span className="form-label-line">Phone number <span className="optional-label">Optional</span></span><input type="tel" autoComplete="tel" placeholder="+1 (555) 000-0000" value={draft.phone} onChange={(event) => updateField("phone", event.target.value)} /></label>
               <label className="form-group">Access role<select value={draft.role} onChange={(event) => updateField("role", event.target.value)}><option>Staff</option><option>Administrator</option><option>Manager</option></select></label>
             </div>

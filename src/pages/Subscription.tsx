@@ -2,12 +2,17 @@ import { useState } from "react";
 import { BadgeCheck, Check, CreditCard, Minus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAppData } from "../hooks/useAppData";
-import { useAuth } from "../hooks/useAuth";
 import type { BillingCycle, SubscriptionPlan } from "../types/models";
 import { defaultWorkspaceSubscription } from "../types/models";
 import { formatKES } from "../services/currencyFormatting";
 
 const plans: { plan: SubscriptionPlan; monthlyPrice: number; seats: number; description: string }[] = [
+  {
+    plan: "Free",
+    monthlyPrice: 0,
+    seats: 3,
+    description: "Explore PulseChart free for 14 days.",
+  },
   {
     plan: "Starter",
     monthlyPrice: 1500,
@@ -15,13 +20,13 @@ const plans: { plan: SubscriptionPlan; monthlyPrice: number; seats: number; desc
     description: "The essentials for a focused team.",
   },
   {
-    plan: "Growth",
+    plan: "Most Popular",
     monthlyPrice: 4900,
     seats: 20,
     description: "More room for a growing operation.",
   },
   {
-    plan: "Enterprise",
+    plan: "Premium",
     monthlyPrice: 12000,
     seats: 50,
     description: "Capacity and visibility for larger teams.",
@@ -29,18 +34,17 @@ const plans: { plan: SubscriptionPlan; monthlyPrice: number; seats: number; desc
 ];
 
 const comparisonRows = [
-  { label: "Company accounts", values: ["Up to 5", "Up to 20", "Up to 50"] },
-  { label: "Shared team inbox", values: [true, true, true] },
-  { label: "Contact management", values: [true, true, true] },
-  { label: "Basic activity reports", values: [true, true, true] },
-  { label: "Expanded reporting", values: [false, true, true] },
-  { label: "Priority support", values: [false, false, true] },
+  { label: "Company accounts", values: ["Up to 3", "Up to 5", "Up to 20", "Up to 50"] },
+  { label: "Shared team inbox", values: [true, true, true, true] },
+  { label: "Contact management", values: [true, true, true, true] },
+  { label: "Basic activity reports", values: [true, true, true, true] },
+  { label: "Expanded reporting", values: [false, false, true, true] },
+  { label: "Customer support", values: [true, true, true, true] },
 ];
 
 function Subscription() {
   const navigate = useNavigate();
-  const { currentAccount, workspace, updateSubscription } = useAppData();
-  const { session, logout } = useAuth();
+  const { workspace, updateSubscription } = useAppData();
   const activeSubscription = workspace?.subscription ?? defaultWorkspaceSubscription;
   const [billingCycle, setBillingCycle] = useState<BillingCycle>(activeSubscription.billingCycle);
 
@@ -53,32 +57,27 @@ function Subscription() {
       return;
     }
 
-    const price = billingCycle === "yearly" ? plan.monthlyPrice * 10 : plan.monthlyPrice;
+    const price = plan.plan === "Free" ? 0 : billingCycle === "yearly" ? plan.monthlyPrice * 10 : plan.monthlyPrice;
+    const startedAt = new Date();
     updateSubscription({
       plan: plan.plan,
       billingCycle,
       price,
       seats: plan.seats,
-      startedAt: activeSubscription.plan === plan.plan ? activeSubscription.startedAt : new Date().toISOString(),
-      status: "payment_pending",
+      startedAt: activeSubscription.plan === plan.plan ? activeSubscription.startedAt : startedAt.toISOString(),
+      trialEndsAt: plan.plan === "Free"
+        ? activeSubscription.plan === "Free" && activeSubscription.trialEndsAt
+          ? activeSubscription.trialEndsAt
+          : new Date(startedAt.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString()
+        : undefined,
+      status: plan.plan === "Free" ? "trial" : "payment_pending",
     });
     navigate("/dashboard", { replace: true });
   };
 
   return (
-    <main className="subscription-gate">
-      <header className="subscription-gate-header">
-        <div className="subscription-gate-brand">
-          <span className="subscription-gate-mark">P</span>
-          <span>PulseChart<small>COMMUNICATION WORKSPACE</small></span>
-        </div>
-        <div className="subscription-gate-user">
-          <span>{session?.user.name ?? currentAccount?.fullName ?? "Workspace administrator"}</span>
-          <button type="button" onClick={() => { logout(); navigate("/login", { replace: true }); }}>Sign out</button>
-        </div>
-      </header>
-      <div className="subscription-page subscription-gate-content">
-      <div className="page-heading subscription-gate-heading">
+    <div className="subscription-page">
+      <div className="page-heading">
         <div>
           <span className="subscription-eyebrow">WORKSPACE SETUP</span>
           <h1>Choose your package</h1>
@@ -92,19 +91,21 @@ function Subscription() {
           <span className="subscription-eyebrow">CURRENT PACKAGE</span>
           <h2 id="current-plan-title">{workspace?.companyName || "Workspace"} <span>{activeSubscription.plan}</span></h2>
           <p>
-            {activeSubscription.seats} company accounts · {activeSubscription.billingCycle === "yearly" ? "Billed annually" : "Billed monthly"} · {activeSubscription.status === "trial" ? "Trial" : activeSubscription.status === "payment_pending" ? "Payment pending" : "Active"}
+            {activeSubscription.seats} company accounts · {activeSubscription.status === "trial" && activeSubscription.trialEndsAt
+              ? `14-day trial ends ${new Date(activeSubscription.trialEndsAt).toLocaleDateString()}`
+              : activeSubscription.billingCycle === "yearly" ? "Billed annually" : "Billed monthly"} · {activeSubscription.status === "trial" ? "Trial" : activeSubscription.status === "payment_pending" ? "Payment pending" : "Active"}
           </p>
         </div>
         <div className="subscription-current-price">
-          <strong>{formatKES(activeSubscription.price)}</strong>
-          <span>/{activeSubscription.billingCycle === "yearly" ? "year" : "month"}</span>
+          <strong>{activeSubscription.plan === "Free" ? "Free" : formatKES(activeSubscription.price)}</strong>
+          <span>{activeSubscription.plan === "Free" ? "14 days" : `/${activeSubscription.billingCycle === "yearly" ? "year" : "month"}`}</span>
         </div>
       </section>
 
       <div className="subscription-plans-heading">
         <div>
           <h2>Available packages</h2>
-          <p>Choose from {formatKES(plans[0].monthlyPrice)} to {formatKES(plans[plans.length - 1].monthlyPrice)} per month. Annual billing includes 2 months free.</p>
+          <p>Compare Free, Starter, Most Popular, and Premium. Annual billing includes 2 months free.</p>
         </div>
         <div className="billing-toggle" role="group" aria-label="Billing cycle">
           <button type="button" aria-pressed={billingCycle === "monthly"} onClick={() => setBillingCycle("monthly")}>Monthly</button>
@@ -116,14 +117,13 @@ function Subscription() {
         {plans.map((plan, index) => {
           const isCurrent = activeSubscription.plan === plan.plan && activeSubscription.billingCycle === billingCycle;
           return (
-            <article className={`subscription-price-card plan-${plan.plan.toLowerCase()}`} key={plan.plan}>
+            <article className={`subscription-price-card plan-${plan.plan.toLowerCase().replaceAll(" ", "-")}`} key={plan.plan}>
               <header className="subscription-price-card-header">
-                {plan.plan === "Growth" && <span className="subscription-price-card-popular">MOST POPULAR</span>}
                 <h3>{plan.plan}</h3>
                 <p>{plan.description}</p>
-                <strong>{formatKES(billingCycle === "yearly" ? plan.monthlyPrice * 10 : plan.monthlyPrice)}</strong>
-                <span>/{billingCycle === "yearly" ? "year" : "month"}</span>
-                {billingCycle === "yearly" && <small>Equivalent to {formatKES(plan.monthlyPrice)}/month</small>}
+                <strong>{plan.plan === "Free" ? "Free" : formatKES(billingCycle === "yearly" ? plan.monthlyPrice * 10 : plan.monthlyPrice)}</strong>
+                <span>{plan.plan === "Free" ? "14 days" : `/${billingCycle === "yearly" ? "year" : "month"}`}</span>
+                {billingCycle === "yearly" && plan.plan !== "Free" && <small>Equivalent to {formatKES(plan.monthlyPrice)}/month</small>}
               </header>
               <ul className="subscription-price-card-features">
                 {comparisonRows.map((row) => {
@@ -151,8 +151,7 @@ function Subscription() {
           );
         })}
       </div>
-      </div>
-    </main>
+    </div>
   );
 }
 

@@ -20,18 +20,29 @@ function readWorkspace(): LocalWorkspace | null {
   const stored = readStored<Partial<LocalWorkspace> | null>("workspace", null);
   if (!stored) return null;
 
-  const plan = stored.subscription?.plan ?? defaultWorkspaceSubscription.plan;
+  const savedPlan = (stored.subscription as { plan?: string } | undefined)?.plan;
+  const plan: SubscriptionPlan = savedPlan === "Enterprise"
+    ? "Premium"
+    : savedPlan === "Growth"
+      ? "Most Popular"
+      : savedPlan === "Free" || savedPlan === "Starter" || savedPlan === "Most Popular" || savedPlan === "Premium"
+      ? savedPlan
+      : defaultWorkspaceSubscription.plan;
   const billingCycle = stored.subscription?.billingCycle ?? defaultWorkspaceSubscription.billingCycle;
-  const previousPrices: Record<SubscriptionPlan, number> = { Starter: 29, Growth: 79, Enterprise: 149 };
-  const currentPrices: Record<SubscriptionPlan, number> = { Starter: 1500, Growth: 4900, Enterprise: 12000 };
+  const previousPrices: Record<SubscriptionPlan, number> = { Free: 0, Starter: 29, "Most Popular": 79, Premium: 149 };
+  const currentPrices: Record<SubscriptionPlan, number> = { Free: 0, Starter: 1500, "Most Popular": 4900, Premium: 12000 };
   const previousPrice = previousPrices[plan] * (billingCycle === "yearly" ? 10 : 1);
   const currentPrice = currentPrices[plan] * (billingCycle === "yearly" ? 10 : 1);
   const savedPrice = stored.subscription?.price;
+  const startedAt = stored.subscription?.startedAt ?? new Date().toISOString();
   const subscription: WorkspaceSubscription = {
     ...defaultWorkspaceSubscription,
     ...(stored.subscription ?? {}),
     price: savedPrice === previousPrice ? currentPrice : savedPrice ?? defaultWorkspaceSubscription.price,
-    startedAt: stored.subscription?.startedAt ?? new Date().toISOString(),
+    startedAt,
+    trialEndsAt: stored.subscription?.trialEndsAt ?? (plan === "Free"
+      ? new Date(new Date(startedAt).getTime() + 14 * 24 * 60 * 60 * 1000).toISOString()
+      : undefined),
   };
 
   return {

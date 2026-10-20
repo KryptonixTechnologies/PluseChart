@@ -27,7 +27,7 @@ export interface AccountInput {
   role: string;
 }
 
-export type SubscriptionPlan = "Starter" | "Growth" | "Enterprise";
+export type SubscriptionPlan = "Free" | "Starter" | "Most Popular" | "Premium";
 export type BillingCycle = "monthly" | "yearly";
 export type SubscriptionStatus = "trial" | "active" | "payment_pending";
 
@@ -37,16 +37,18 @@ export interface WorkspaceSubscription {
   price: number;
   seats: number;
   startedAt: string;
+  trialEndsAt?: string;
   status?: SubscriptionStatus;
 }
 
 export const defaultWorkspaceSubscription: WorkspaceSubscription = {
-  plan: "Starter",
+  plan: "Free",
   billingCycle: "monthly",
-  price: 1500,
-  seats: 5,
+  price: 0,
+  seats: 3,
   startedAt: new Date().toISOString(),
-  status: "active",
+  trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+  status: "trial",
 };
 
 export interface LocalWorkspace {

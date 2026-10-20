@@ -85,6 +85,40 @@ select {
   padding-right: 46px;
 }
 
+.password-field .password-input-generatable {
+  padding-right: 126px;
+}
+
+.password-generate-button {
+  position: absolute;
+  top: 50%;
+  right: 42px;
+  display: inline-flex;
+  height: 32px;
+  align-items: center;
+  gap: 5px;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 6px;
+  padding: 0 7px;
+  background: transparent;
+  color: #2563eb;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.password-generate-button:hover {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.password-generate-button:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 1px;
+}
+
 .password-visibility-toggle {
   position: absolute;
   top: 50%;
@@ -3330,10 +3364,10 @@ select {
   gap: 16px;
   padding: 20px 24px;
   margin: 20px 0 30px;
-  border: 1px solid #245b54;
+  border: 1px solid #1d4ed8;
   border-radius: 10px;
-  background: linear-gradient(110deg, #153a3a 0%, #1b5147 72%, #226555 100%);
-  box-shadow: 0 12px 28px rgba(20, 61, 53, 0.12);
+  background: linear-gradient(110deg, #172554 0%, #1d4ed8 72%, #2563eb 100%);
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.12);
 }
 
 .subscription-current-icon {
@@ -3343,8 +3377,8 @@ select {
   height: 46px;
   flex: 0 0 auto;
   border-radius: 8px;
-  color: #104f46;
-  background: #a7e3ca;
+  color: #1d4ed8;
+  background: #dbeafe;
 }
 
 .subscription-current-copy {
@@ -3373,8 +3407,8 @@ select {
 .subscription-current-copy h2 span {
   padding: 4px 8px;
   border-radius: 5px;
-  background: rgba(204, 248, 227, 0.14);
-  color: #b9efd5;
+  background: rgba(219, 234, 254, .18);
+  color: #dbeafe;
   font-size: 11px;
 }
 
@@ -3386,11 +3420,11 @@ select {
 }
 
 .subscription-current-copy p {
-  color: #c6ddd6;
+  color: #dbeafe;
 }
 
 .subscription-current .subscription-eyebrow {
-  color: #9be3c3;
+  color: #bfdbfe;
 }
 
 .subscription-current-price {
@@ -3399,12 +3433,12 @@ select {
 }
 
 .subscription-current-price strong {
-  color: #f2fbf7;
+  color: #fff;
   font-size: 25px;
 }
 
 .subscription-current-price span {
-  color: #c6ddd6;
+  color: #dbeafe;
 }
 
 .subscription-plans-heading {
@@ -3481,7 +3515,7 @@ select {
   background: #267b99;
 }
 
-.subscription-comparison-plan.plan-growth {
+.subscription-comparison-plan.plan-most-popular {
   --tier-accent: #16816d;
   background: #16816d;
 }
@@ -3612,13 +3646,13 @@ select {
 
 .subscription-price-cards {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: stretch;
   gap: 18px;
 }
 
 .subscription-price-card {
-  --tier-accent: #e45d2d;
+  --tier-accent: #64748b;
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -3631,12 +3665,16 @@ select {
   transition: transform 180ms ease, box-shadow 180ms ease;
 }
 
-.subscription-price-card.plan-growth {
-  --tier-accent: #d58b21;
+.subscription-price-card.plan-most-popular {
+  --tier-accent: #16a34a;
 }
 
-.subscription-price-card.plan-enterprise {
-  --tier-accent: #1594a1;
+.subscription-price-card.plan-starter {
+  --tier-accent: #2563eb;
+}
+
+.subscription-price-card.plan-premium {
+  --tier-accent: #111827;
 }
 
 .subscription-price-card:hover {
@@ -3672,7 +3710,7 @@ select {
   margin-top: 14px;
   font-size: 32px;
   line-height: 1.1;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .subscription-price-card-header > span {
@@ -3763,6 +3801,12 @@ select {
 }
 
 @media (max-width: 900px) {
+  .subscription-price-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1150px) {
   .subscription-price-cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

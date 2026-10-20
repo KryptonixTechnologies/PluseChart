@@ -4,7 +4,7 @@ import { Link, Navigate, useLocation, useNavigate, useParams, useSearchParams } 
 import { useAuth } from "../hooks/useAuth";
 import { useAppData } from "../hooks/useAppData";
 import type { CompanyRegistrationInput } from "../hooks/authContext";
-import type { AccountInput } from "../types/models";
+import type { AccountInput, SubscriptionPlan } from "../types/models";
 import { defaultSettings } from "../data/seedData";
 import { formatKES } from "../services/currencyFormatting";
 import PasswordInput from "../components/PasswordInput";
@@ -112,8 +112,7 @@ export function CompanySignupPage() {
   const [domain, setDomain] = useState("");
   const [industry, setIndustry] = useState("");
   const [country, setCountry] = useState("Kenya");
-  const [subscriptionPlan, setSubscriptionPlan] = useState<"Starter" | "Growth" | "Enterprise">("Starter");
-  const [subscriptionMode, setSubscriptionMode] = useState<"trial" | "paid">("trial");
+  const [subscriptionPlan, setSubscriptionPlan] = useState<SubscriptionPlan>("Free");
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
   const [adminName, setAdminName] = useState("");
   const [adminEmail, setAdminEmail] = useState("");
@@ -129,17 +128,18 @@ export function CompanySignupPage() {
   const [copyFeedback, setCopyFeedback] = useState("");
 
   const subscriptionOptions = [
+    { plan: "Free", price: 0, seats: 3, description: "Explore PulseChart free for 14 days." },
     { plan: "Starter", price: 1500, seats: 5, description: "For small teams getting started." },
-    { plan: "Growth", price: 4900, seats: 20, description: "For growing communication teams." },
-    { plan: "Enterprise", price: 12000, seats: 50, description: "Advanced operations and scaling." },
+    { plan: "Most Popular", price: 4900, seats: 20, description: "For growing communication teams." },
+    { plan: "Premium", price: 12000, seats: 50, description: "Advanced operations and scaling." },
   ] as const;
   const subscriptionComparisonRows: { label: string; values: (string | boolean)[] }[] = [
     { label: "Company accounts", values: subscriptionOptions.map((option) => `Up to ${option.seats}`) },
-    { label: "Shared team inbox", values: [true, true, true] },
-    { label: "Contact management", values: [true, true, true] },
-    { label: "Basic activity reports", values: [true, true, true] },
-    { label: "Expanded reporting", values: [false, true, true] },
-    { label: "Priority support", values: [false, false, true] },
+    { label: "Shared team inbox", values: [true, true, true, true] },
+    { label: "Contact management", values: [true, true, true, true] },
+    { label: "Basic activity reports", values: [true, true, true, true] },
+    { label: "Expanded reporting", values: [false, false, true, true] },
+    { label: "Customer support", values: [true, true, true, true] },
   ];
   const selectedSubscription = subscriptionOptions.find((option) => option.plan === subscriptionPlan) ?? subscriptionOptions[0];
 
@@ -196,6 +196,7 @@ export function CompanySignupPage() {
     setIsSubmitting(true);
     setError("");
     try {
+      const subscriptionStartedAt = new Date();
       const input: CompanyRegistrationInput = {
         company_name: companyName.trim(),
         domain: domain.trim().replace(/^https?:\/\//i, "").replace(/\/+$/, "").toLowerCase(),
@@ -211,10 +212,13 @@ export function CompanySignupPage() {
         subscription: {
           plan: selectedSubscription.plan,
           billingCycle,
-          price: subscriptionMode === "trial" ? 0 : billingCycle === "yearly" ? selectedSubscription.price * 10 : selectedSubscription.price,
+          price: selectedSubscription.plan === "Free" ? 0 : billingCycle === "yearly" ? selectedSubscription.price * 10 : selectedSubscription.price,
           seats: selectedSubscription.seats,
-          startedAt: new Date().toISOString(),
-          status: subscriptionMode === "trial" ? "trial" : "payment_pending",
+          startedAt: subscriptionStartedAt.toISOString(),
+          trialEndsAt: selectedSubscription.plan === "Free"
+            ? new Date(subscriptionStartedAt.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString()
+            : undefined,
+          status: selectedSubscription.plan === "Free" ? "trial" : "payment_pending",
         },
       };
       await registerCompany(input);
@@ -277,7 +281,7 @@ export function CompanySignupPage() {
 
   if (isComplete) {
     return (
-      <main className="tenant-auth-page">
+      <main className="tenant-auth-page company-signup-page">
         <section className="tenant-auth-card company-auth-card" aria-labelledby="workspace-ready-heading">
           <AuthBrand />
           <span className="tenant-auth-eyebrow">WORKSPACE READY</span>
@@ -354,22 +358,16 @@ export function CompanySignupPage() {
                 <strong>{adminName}</strong>
                 <small>{adminEmail} · {jobTitle}</small>
               </div>
-              <div className="tenant-auth-choice-toggle" role="group" aria-label="Subscription type">
-                <button type="button" aria-pressed={subscriptionMode === "trial"} onClick={() => setSubscriptionMode("trial")}>Start with a trial</button>
-                <button type="button" aria-pressed={subscriptionMode === "paid"} onClick={() => setSubscriptionMode("paid")}>Choose a paid plan</button>
-              </div>
               <div className="company-package-cards" role="group" aria-label="Subscription packages">
                 {subscriptionOptions.map((option, index) => {
                   const isSelected = subscriptionPlan === option.plan;
                   return (
-                    <article className={`company-package-card package-${option.plan.toLowerCase()}${isSelected ? " selected" : ""}`} key={option.plan}>
+                    <article className={`company-package-card package-${option.plan.toLowerCase().replaceAll(" ", "-")}${isSelected ? " selected" : ""}`} key={option.plan}>
                       <button className="company-package-card-header" type="button" aria-pressed={isSelected} onClick={() => setSubscriptionPlan(option.plan)}>
                         <strong>{option.plan}</strong>
-                        <span>{formatKES(billingCycle === "yearly" ? option.price * 10 : option.price)}</span>
-                        <small>/{billingCycle === "yearly" ? "year" : "month"}</small>
-                        <small>{subscriptionMode === "trial"
-                          ? isSelected ? "Trial selected" : "Trial available"
-                          : isSelected ? "Selected" : "Select plan"}</small>
+                        <span>{option.plan === "Free" ? "Free" : formatKES(billingCycle === "yearly" ? option.price * 10 : option.price)}</span>
+                        <small>{option.plan === "Free" ? "14 days" : `/${billingCycle === "yearly" ? "year" : "month"}`}</small>
+                        <small>{option.plan === "Free" ? "14-day trial" : isSelected ? "Selected" : "Paid plan"}</small>
                       </button>
                       <p className="company-package-card-description">{option.description}</p>
                       <ul className="company-package-card-features">
@@ -387,13 +385,13 @@ export function CompanySignupPage() {
                         })}
                       </ul>
                       <button className="company-package-card-select" type="button" aria-pressed={isSelected} onClick={() => setSubscriptionPlan(option.plan)}>
-                        {isSelected ? subscriptionMode === "trial" ? "Trial selected" : "Selected" : `Select ${option.plan}`}
+                        {isSelected ? option.plan === "Free" ? "Free trial selected" : "Selected" : `Select ${option.plan}`}
                       </button>
                     </article>
                   );
                 })}
               </div>
-              {subscriptionMode === "paid" && <div className="tenant-auth-payment-note" role="status">
+              {subscriptionPlan !== "Free" && <div className="tenant-auth-payment-note" role="status">
                 <strong>Payment setup</strong>
                 <span>Checkout is not connected. No payment details are collected and no charge will be made.</span>
                 <div className="tenant-auth-choice-toggle compact" role="group" aria-label="Billing cycle">
@@ -401,7 +399,7 @@ export function CompanySignupPage() {
                   <button type="button" aria-pressed={billingCycle === "yearly"} onClick={() => setBillingCycle("yearly")}>Yearly · 2 months free</button>
                 </div>
               </div>}
-              {subscriptionMode === "trial" && <p className="tenant-auth-small-note">Trial duration and payment setup are not configured yet.</p>}
+              {subscriptionPlan === "Free" && <p className="tenant-auth-small-note">The Free plan includes 14 days of access.</p>}
             </section>
             <div className="tenant-auth-step-actions company-signup-step-actions">
               <button className="secondary-button" type="button" onClick={() => { setError(""); setStep(1); }}>Back</button>
@@ -441,7 +439,7 @@ export function LoginPage() {
   };
 
   return (
-    <main className="tenant-auth-page">
+    <main className="tenant-auth-page login-auth-page">
       <section className="tenant-auth-card" aria-labelledby="login-heading">
         <AuthBrand />
         <span className="tenant-auth-eyebrow">MEMBER ACCESS</span>

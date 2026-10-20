@@ -306,7 +306,7 @@
 
 .company-package-cards {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: stretch;
   gap: 13px;
 }
@@ -324,7 +324,7 @@
   transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
 
-.company-package-card.package-growth {
+.company-package-card.package-most-popular {
   --package-accent: #d89524;
 }
 
@@ -944,6 +944,101 @@
   text-align: center;
 }
 
+.login-auth-page {
+  background: #f4f7fb;
+  color: #1e293b;
+}
+
+.login-auth-page .tenant-auth-card {
+  border-color: #e5e7eb;
+  background: #fff;
+  box-shadow: 0 18px 48px rgba(17, 24, 39, .1);
+}
+
+.login-auth-page .tenant-auth-brand,
+.login-auth-page .tenant-auth-card h1 {
+  color: #111827;
+}
+
+.login-auth-page .tenant-auth-mark {
+  background: #2563eb;
+}
+
+.login-auth-page .tenant-auth-brand small,
+.login-auth-page .tenant-auth-description,
+.login-auth-page .tenant-auth-switch,
+.login-auth-page .tenant-auth-account-link small {
+  color: #64748b;
+}
+
+.login-auth-page .tenant-auth-eyebrow {
+  color: #2563eb;
+}
+
+.login-auth-page .tenant-auth-form label {
+  color: #334155;
+}
+
+.login-auth-page .tenant-auth-form input {
+  border-color: #dbe2ea;
+  background: #fff;
+  color: #1e293b;
+}
+
+.login-auth-page .tenant-auth-form input::placeholder {
+  color: #94a3b8;
+}
+
+.login-auth-page .tenant-auth-form input:focus-visible {
+  border-color: #60a5fa;
+  outline-color: rgba(37, 99, 235, .2);
+}
+
+.login-auth-page .tenant-auth-form .password-visibility-toggle {
+  color: #64748b;
+}
+
+.login-auth-page .tenant-auth-form .password-visibility-toggle:hover {
+  background: #eff6ff;
+  color: #1e293b;
+}
+
+.login-auth-page .tenant-auth-submit {
+  background: #2563eb;
+}
+
+.login-auth-page .tenant-auth-submit:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.login-auth-page .tenant-auth-switch a,
+.login-auth-page .tenant-auth-notice a {
+  color: #2563eb;
+}
+
+.login-auth-page .tenant-auth-notice {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #334155;
+}
+
+.login-auth-page .tenant-auth-error {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.login-auth-page .tenant-auth-account-link {
+  border-color: #dbe2ea;
+  color: #1e293b;
+}
+
+.login-auth-page .tenant-auth-account-link:hover,
+.login-auth-page .tenant-auth-account-link:focus-visible {
+  border-color: #60a5fa;
+  background: #eff6ff;
+}
+
 @media (max-width: 480px) {
   .tenant-auth-card {
     padding: 27px 22px;
@@ -1001,6 +1096,10 @@
   .company-signup-notifications {
     grid-template-columns: 1fr;
   }
+
+  .company-package-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 520px) {
@@ -1029,4 +1128,246 @@
   .company-signup-step-actions {
     grid-template-columns: 1fr;
   }
+
+  .company-package-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.company-signup-page {
+  background: #f4f7fb;
+  color: #1e293b;
+}
+
+.company-signup-page .tenant-auth-card {
+  border-color: #e5e7eb;
+  background: #fff;
+  box-shadow: 0 18px 48px rgba(17, 24, 39, .1);
+}
+
+.company-signup-page .tenant-auth-brand,
+.company-signup-page .tenant-auth-card h1,
+.company-signup-page .company-signup-section-heading h2 {
+  color: #111827;
+}
+
+.company-signup-page .tenant-auth-mark {
+  background: #2563eb;
+}
+
+.company-signup-page .tenant-auth-brand small,
+.company-signup-page .tenant-auth-description,
+.company-signup-page .company-signup-section-heading p,
+.company-signup-page .company-signup-summary > span,
+.company-signup-page .company-signup-summary small,
+.company-signup-page .tenant-auth-small-note {
+  color: #64748b;
+}
+
+.company-signup-page .tenant-auth-eyebrow {
+  color: #2563eb;
+}
+
+.company-signup-page .tenant-auth-form label {
+  color: #334155;
+}
+
+.company-signup-page .tenant-auth-form input,
+.company-signup-page .tenant-auth-form select {
+  border-color: #dbe2ea;
+  background: #fff;
+  color: #1e293b;
+}
+
+.company-signup-page .tenant-auth-form select option {
+  background: #fff;
+  color: #1e293b;
+}
+
+.company-signup-page .tenant-auth-form input::placeholder {
+  color: #94a3b8;
+}
+
+.company-signup-page .tenant-auth-form input:focus-visible,
+.company-signup-page .tenant-auth-form select:focus-visible {
+  border-color: #60a5fa;
+  outline-color: rgba(37, 99, 235, .2);
+}
+
+.company-signup-page .company-signup-progress > div {
+  border-color: #dbe2ea;
+  background: #f8fafc;
+  color: #64748b;
+}
+
+.company-signup-page .company-signup-progress > div.current {
+  border-color: #2563eb;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.company-signup-page .company-signup-progress > div.current > span,
+.company-signup-page .company-signup-progress > div.complete > span {
+  background: #2563eb;
+  color: #fff;
+}
+
+.company-signup-page .company-signup-section,
+.company-signup-page .company-signup-summary {
+  border-color: #e2e8f0;
+  background: #f8fafc;
+}
+
+.company-signup-page .company-signup-section-heading > span {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.company-signup-page .company-signup-summary strong {
+  color: #1e293b;
+}
+
+.company-signup-page .company-package-card {
+  --package-accent: #64748b;
+}
+
+.company-signup-page .company-package-card.package-starter {
+  --package-accent: #2563eb;
+}
+
+.company-signup-page .company-package-card.package-most-popular {
+  --package-accent: #16a34a;
+}
+
+.company-signup-page .company-package-card.package-premium {
+  --package-accent: #111827;
+}
+
+.company-signup-page .company-package-card-header > span:not(.company-package-popular) {
+  margin-top: 4px;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.company-package-popular {
+  align-self: flex-end;
+  border-radius: 999px;
+  padding: 4px 7px;
+  background: rgba(255, 255, 255, .2);
+  color: #fff;
+  font-size: 8px !important;
+  font-weight: 800;
+}
+
+.company-signup-page .company-package-card-description,
+.company-signup-page .company-package-card-features li,
+.company-signup-page .company-package-card-features li > span strong {
+  color: #475569;
+}
+
+.company-signup-page .company-package-card-select {
+  border-radius: 7px;
+}
+
+.company-signup-page .company-package-card-select[aria-pressed="true"] {
+  background: #fff;
+}
+
+.company-signup-page .tenant-auth-payment-note {
+  border-color: #bfdbfe;
+  border-left-color: #2563eb;
+  background: #eff6ff;
+}
+
+.company-signup-page .tenant-auth-payment-note > strong {
+  color: #1e3a8a;
+}
+
+.company-signup-page .tenant-auth-payment-note > span {
+  color: #475569;
+}
+
+.company-signup-page .tenant-auth-choice-toggle {
+  border-color: #dbe2ea;
+  background: #fff;
+}
+
+.company-signup-page .tenant-auth-choice-toggle button {
+  color: #64748b;
+}
+
+.company-signup-page .tenant-auth-choice-toggle button:hover {
+  color: #1e293b;
+}
+
+.company-signup-page .tenant-auth-choice-toggle button[aria-pressed="true"] {
+  background: #eff6ff;
+  color: #1d4ed8;
+  box-shadow: inset 0 0 0 1px #bfdbfe;
+}
+
+.company-signup-page .tenant-auth-submit {
+  background: #2563eb;
+}
+
+.company-signup-page .tenant-auth-submit:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.company-signup-page .tenant-auth-switch {
+  color: #64748b;
+}
+
+.company-signup-page .tenant-auth-switch a {
+  color: #2563eb;
+}
+
+.company-signup-page .tenant-auth-invite {
+  border-color: #dbe2ea;
+  background: #f8fafc;
+}
+
+.company-signup-page .tenant-auth-invite > label,
+.company-signup-page .tenant-auth-team-form label {
+  color: #334155;
+}
+
+.company-signup-page .tenant-auth-invite-row input,
+.company-signup-page .tenant-auth-team-form input,
+.company-signup-page .tenant-auth-team-form select {
+  border-color: #dbe2ea;
+  background: #fff;
+  color: #1e293b;
+}
+
+.company-signup-page .tenant-auth-invite-row input {
+  letter-spacing: .12em;
+}
+
+.company-signup-page .tenant-auth-invite p,
+.company-signup-page .tenant-auth-invite [role="status"] {
+  color: #64748b;
+}
+
+.company-signup-page .tenant-auth-team-form {
+  border-color: #e2e8f0;
+}
+
+.company-signup-page .tenant-auth-section-label {
+  border-color: #e2e8f0;
+  color: #2563eb;
+}
+
+.company-signup-page .tenant-auth-invite-row .secondary-button,
+.company-signup-page .tenant-auth-team-form > .secondary-button {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.company-signup-page .tenant-auth-invite-row .secondary-button:hover,
+.company-signup-page .tenant-auth-team-form > .secondary-button:hover:not(:disabled) {
+  background: #dbeafe;
 }

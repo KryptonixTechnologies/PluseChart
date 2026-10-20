@@ -47,9 +47,6 @@ function App() {
               <Route path="/sign-in" element={<Navigate to="/login" replace />} />
 
               <Route element={<RequireAuth />}>
-                <Route element={<RequireAdmin />}>
-                  <Route path="/subscription" element={<Subscription />} />
-                </Route>
                 <Route path="/" element={<Layout />}>
                   <Route index element={<Navigate to="/dashboard" replace />} />
                   <Route path="dashboard" element={<Dashboard />} />
@@ -59,6 +56,7 @@ function App() {
                   <Route element={<RequireAdmin />}>
                     <Route path="settings" element={<Settings />} />
                     <Route path="accounts" element={<Accounts />} />
+                    <Route path="subscription" element={<Subscription />} />
                   </Route>
                 </Route>
               </Route>
