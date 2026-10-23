@@ -9,7 +9,7 @@ const emptyAccount: AccountInput = {
   fullName: "",
   email: "",
   phone: "",
-  role: "Staff",
+  role: "Team Member",
 };
 
 function Accounts() {
@@ -112,7 +112,7 @@ function Accounts() {
               <label className="form-group">Work email<input required type="email" autoComplete="email" placeholder="name@organization.com" value={draft.email} onChange={(event) => updateField("email", event.target.value)} /></label>
               <label className="form-group">{editingAccountId ? "New password (optional)" : "Password"}<PasswordInput required={!editingAccountId} autoComplete="new-password" minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} onGeneratePassword={setPassword} /></label>
               <label className="form-group"><span className="form-label-line">Phone number <span className="optional-label">Optional</span></span><input type="tel" autoComplete="tel" placeholder="+1 (555) 000-0000" value={draft.phone} onChange={(event) => updateField("phone", event.target.value)} /></label>
-              <label className="form-group">Access role<select value={draft.role} onChange={(event) => updateField("role", event.target.value)}><option>Staff</option><option>Administrator</option><option>Manager</option></select></label>
+              <label className="form-group">Access role<select value={draft.role} onChange={(event) => updateField("role", event.target.value)}><option>Team Member</option><option>Channel Owner</option><option>Administrator</option><option>Manager</option></select></label>
             </div>
             <div className="accounts-local-note"><span aria-hidden="true">i</span><p>Team members can sign in with the email and password you provide.</p></div>
             <div className="account-form-actions">

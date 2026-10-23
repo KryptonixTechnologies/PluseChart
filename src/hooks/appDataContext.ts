@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import type { Account, AccountInput, AppSettings, Contact, ContactInput, LocalWorkspace, Message, MessageInput, WorkspaceSubscription } from "../types/models";
+import type { Account, AccountInput, AppSettings, Channel, ChannelInput, Contact, ContactInput, LocalWorkspace, Message, MessageInput, WorkspaceSubscription } from "../types/models";
 
 export interface AppDataContextValue {
   accounts: Account[];
@@ -8,6 +8,7 @@ export interface AppDataContextValue {
   updateSubscription: (subscription: WorkspaceSubscription) => void;
   registerInvitedAccount: (input: AccountInput, password: string, inviteCode: string) => Promise<"created" | "duplicate" | "unavailable" | "invalid_invite">;
   contacts: Contact[];
+  channels: Channel[];
   messages: Message[];
   settings: AppSettings;
   addAccount: (input: AccountInput, password: string, signInAfterCreate?: boolean) => Promise<"created" | "duplicate" | "unavailable">;
@@ -19,6 +20,9 @@ export interface AppDataContextValue {
   addContact: (input: ContactInput) => void;
   updateContact: (id: string, input: ContactInput) => void;
   deleteContact: (id: string) => void;
+  addChannel: (input: ChannelInput) => Channel;
+  updateChannel: (id: string, changes: Partial<Channel>) => void;
+  deleteChannel: (id: string) => void;
   addMessage: (input: MessageInput) => void;
   updateMessage: (id: string, changes: Partial<Message>) => void;
   deleteMessage: (id: string) => void;

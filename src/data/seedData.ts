@@ -1,4 +1,4 @@
-import type { AppSettings, Contact, Message } from "../types/models";
+import type { AppSettings, Channel, Contact, Message } from "../types/models";
 
 const now = Date.now();
 
@@ -53,6 +53,12 @@ export const seedContacts: Contact[] = [
     status: "inactive",
     createdAt: new Date(now - 1000 * 60 * 60 * 24 * 4).toISOString(),
   },
+];
+
+export const seedChannels: Channel[] = [
+  { id: "channel-general", name: "general", description: "Team-wide conversation", ownerId: "", memberIds: [], pinnedMessageIds: [], isPrivate: false, createdAt: new Date(now).toISOString() },
+  { id: "channel-announcements", name: "announcements", description: "Important team updates", ownerId: "", memberIds: [], pinnedMessageIds: [], isPrivate: false, createdAt: new Date(now).toISOString() },
+  { id: "channel-projects", name: "projects", description: "Project discussions", ownerId: "", memberIds: [], pinnedMessageIds: [], isPrivate: false, createdAt: new Date(now).toISOString() },
 ];
 
 export const seedMessages: Message[] = [

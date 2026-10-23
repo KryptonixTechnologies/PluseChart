@@ -64,15 +64,42 @@ export interface LocalWorkspace {
 
 export type MessageFolder = "inbox" | "sent" | "archived";
 export type MessageDirection = "sent" | "received";
+export type MessageConversationType = "channel" | "direct";
+
+export interface Channel {
+  id: string;
+  name: string;
+  description: string;
+  ownerId: string;
+  memberIds: string[];
+  pinnedMessageIds: string[];
+  isPrivate: boolean;
+  createdAt: string;
+}
+
+export type ChannelInput = Omit<Channel, "id" | "createdAt" | "pinnedMessageIds">;
+
+export interface MessageAttachment {
+  name: string;
+  type: string;
+  size: number;
+  dataUrl: string;
+}
 
 export interface Message {
   id: string;
   recipientId: string;
+  senderId?: string;
   senderName: string;
   subject: string;
   content: string;
   direction: MessageDirection;
   folder: MessageFolder;
+  conversationType?: MessageConversationType;
+  conversationId?: string;
+  mentions?: string[];
+  attachments?: MessageAttachment[];
+  readBy?: string[];
   previousFolder?: Exclude<MessageFolder, "archived">;
   read: boolean;
   createdAt: string;
@@ -114,6 +141,11 @@ export interface ContactInput {
 
 export interface MessageInput {
   recipientId: string;
+  senderId?: string;
   subject: string;
   content: string;
+  conversationType?: MessageConversationType;
+  conversationId?: string;
+  mentions?: string[];
+  attachments?: MessageAttachment[];
 }

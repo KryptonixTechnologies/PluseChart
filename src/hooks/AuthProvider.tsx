@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       fullName: input.name.trim(),
       email: input.email.trim(),
       phone: "",
-      role: "Member",
+      role: "Team Member",
     }, input.password, input.invite_code);
     if (result !== "created") {
       throw new Error(result === "duplicate"

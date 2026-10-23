@@ -42,7 +42,7 @@ Plan options appear as individual pricing cards during administrator setup and o
 ## Workspace features
 
 - **Dashboard:** communication totals, recent activity, and charts.
-- **Messages:** browse, search, compose, view, reply, archive, restore, and delete messages.
+- **Messages:** chat in public or private channels and direct conversations; search history; pin channel messages; mention teammates; and share images, PDFs, and text/code files up to 1 MB per message. Markdown and fenced code blocks are rendered in chat.
 - **Contacts:** add, view, edit, delete, search, and filter contacts.
 - **Reports:** review communication totals, read rate, charts, and department summaries.
 - **Settings:** update the current account profile, notification preferences, language, time zone, and date format.
@@ -52,7 +52,9 @@ Sample contacts and messages are added the first time the app runs in a browser.
 
 ## Data and limitations
 
-App data is kept in browser `localStorage`; it is not synchronized between browsers or devices, and it is not isolated between accounts on the same browser. Signing out does not remove locally saved app data. Clearing this site's browser storage removes the local workspace and its data.
+App data is kept in browser `localStorage`; it is not synchronized between browsers or devices, and it is not isolated between accounts on the same browser. Message changes are reflected in other tabs of the same browser profile, but there is no server-backed real-time delivery between team members. Signing out does not remove locally saved app data. Clearing this site's browser storage removes the local workspace and its data.
+
+Channel owners can create and manage channels, choose members, and pin messages. Workspace administrators can manage every channel and manage accounts from the Accounts page. Mentions and message attachments are stored locally with chat history; they do not send push notifications or upload files to a shared server.
 
 Invite codes are checked only against the workspace saved in the same browser and can be redeemed once. Notifications are not sent, and there is no server-backed authentication, invitation delivery, payment processing, or tenant security. Use this app as a frontend prototype only.
 

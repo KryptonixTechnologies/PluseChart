@@ -121,7 +121,7 @@ export function CompanySignupPage() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [inviteCode, setInviteCode] = useState("");
-  const [member, setMember] = useState<AccountInput>({ fullName: "", email: "", phone: "", role: "Staff" });
+  const [member, setMember] = useState<AccountInput>({ fullName: "", email: "", phone: "", role: "Team Member" });
   const [memberPassword, setMemberPassword] = useState("");
   const [memberFeedback, setMemberFeedback] = useState("");
   const [isAddingMember, setIsAddingMember] = useState(false);
@@ -247,7 +247,7 @@ export function CompanySignupPage() {
           : "Unable to securely save this password. Please try again.");
         return;
       }
-      setMember({ fullName: "", email: "", phone: "", role: "Staff" });
+      setMember({ fullName: "", email: "", phone: "", role: "Team Member" });
       setMemberPassword("");
       setMemberFeedback("Team member added. They can sign in with their email and password.");
     } finally {

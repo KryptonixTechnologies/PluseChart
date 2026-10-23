@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { defaultSettings, seedContacts, seedMessages } from "../data/seedData";
+import { defaultSettings, seedChannels, seedContacts, seedMessages } from "../data/seedData";
 import { createPasswordCredential, verifyPassword } from "../services/localAuth";
 import { readStored, writeStored } from "../services/storage";
 import { AppDataContext } from "./appDataContext";
 import type { AppDataContextValue } from "./appDataContext";
-import type { Account, AppSettings, LocalWorkspace, SubscriptionPlan, WorkspaceSubscription } from "../types/models";
+import type { Account, AppSettings, Channel, LocalWorkspace, SubscriptionPlan, WorkspaceSubscription } from "../types/models";
 import { defaultWorkspaceSubscription } from "../types/models";
 import type { PasswordCredential } from "../services/localAuth";
 
@@ -59,6 +59,7 @@ function readWorkspace(): LocalWorkspace | null {
 
 export function AppDataProvider({ children }: { children: React.ReactNode }) {
   const [contacts, setContacts] = useState(() => readStored("contacts", seedContacts));
+  const [channels, setChannels] = useState<Channel[]>(() => readStored("channels", seedChannels));
   const [messages, setMessages] = useState(() => readStored("messages", seedMessages));
   const [settings, setSettings] = useState(() => readStored("settings", defaultSettings));
   const [accounts, setAccounts] = useState<Account[]>(() => readStored("accounts", []));
@@ -72,8 +73,38 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => writeStored("workspace", workspace), [workspace]);
   useEffect(() => writeStored("credentials", credentials), [credentials]);
   useEffect(() => writeStored("contacts", contacts), [contacts]);
+  useEffect(() => writeStored("channels", channels), [channels]);
   useEffect(() => writeStored("messages", messages), [messages]);
   useEffect(() => writeStored("settings", settings), [settings]);
+
+  useEffect(() => {
+    const syncMessages = (event: StorageEvent) => {
+      if (event.key !== "pulsechart.messages" || !event.newValue) return;
+      try {
+        const nextMessages: unknown = JSON.parse(event.newValue);
+        if (Array.isArray(nextMessages)) setMessages(nextMessages);
+      } catch {
+        // Ignore malformed data written by another tab.
+      }
+    };
+
+    const syncChannels = (event: StorageEvent) => {
+      if (event.key !== "pulsechart.channels" || !event.newValue) return;
+      try {
+        const nextChannels: unknown = JSON.parse(event.newValue);
+        if (Array.isArray(nextChannels)) setChannels(nextChannels);
+      } catch {
+        // Ignore malformed data written by another tab.
+      }
+    };
+
+    window.addEventListener("storage", syncMessages);
+    window.addEventListener("storage", syncChannels);
+    return () => {
+      window.removeEventListener("storage", syncMessages);
+      window.removeEventListener("storage", syncChannels);
+    };
+  }, []);
 
   const currentAccount = accounts.find((account) => account.id === sessionAccountId) ?? null;
 
@@ -133,6 +164,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         return result;
       },
       contacts,
+      channels,
       messages,
       settings,
       addAccount: (input, password, signInAfterCreate = false) => createLocalAccount(input, password, signInAfterCreate),
@@ -166,8 +198,16 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
       },
       deleteAccount: (id) => {
         if (currentAccount?.id === id || !accounts.some((account) => account.id === id)) return false;
+        const replacementOwnerId = accounts.find((account) => account.id !== id && account.role === "Administrator")?.id
+          ?? accounts.find((account) => account.id !== id)?.id
+          ?? "";
         setAccounts((current) => current.filter((account) => account.id !== id));
         setCredentials((current) => current.filter((credential) => credential.accountId !== id));
+        setChannels((current) => current.map((channel) => ({
+          ...channel,
+          ownerId: channel.ownerId === id ? replacementOwnerId : channel.ownerId,
+          memberIds: channel.memberIds.filter((memberId) => memberId !== id),
+        })));
         return true;
       },
       createInitialAdmin: async (input, password, workspaceDetails, initialSettings) => {
@@ -215,16 +255,27 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         setContacts((current) => current.map((contact) => (contact.id === id ? { ...contact, ...input } : contact)));
       },
       deleteContact: (id) => setContacts((current) => current.filter((contact) => contact.id !== id)),
+      addChannel: (input) => {
+        const channel: Channel = { ...input, id: createId("channel"), pinnedMessageIds: [], createdAt: new Date().toISOString() };
+        setChannels((current) => [...current, channel]);
+        return channel;
+      },
+      updateChannel: (id, changes) => setChannels((current) => current.map((channel) => channel.id === id ? { ...channel, ...changes } : channel)),
+      deleteChannel: (id) => {
+        setChannels((current) => current.filter((channel) => channel.id !== id));
+        setMessages((current) => current.filter((message) => message.conversationId !== id));
+      },
       addMessage: (input) => {
-        const recipient = contacts.find((contact) => contact.id === input.recipientId);
         setMessages((current) => [
           {
             ...input,
             id: createId("message"),
-            senderName: recipient?.name ?? "Unknown contact",
+            senderId: currentAccount?.id,
+            senderName: currentAccount?.fullName ?? settings.profile.fullName,
             direction: "sent",
             folder: "sent",
             read: true,
+            readBy: currentAccount ? [currentAccount.id] : [],
             createdAt: new Date().toISOString(),
           },
           ...current,
@@ -242,7 +293,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
       },
       };
     },
-    [accounts, contacts, credentials, currentAccount, messages, settings, workspace],
+    [accounts, channels, contacts, credentials, currentAccount, messages, settings, workspace],
   );
 
   return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>;
